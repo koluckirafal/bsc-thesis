@@ -1,0 +1,69 @@
+% Rafał Kołucki 215514
+\ProvidesPackage{dmcsTitle}[2022-02-13 v.01 strona tytułowa pracy dyplomowej dla Katedry Mikroelektroniki i Technik Informatycznych]
+\RequirePackage[polish]{babel}
+\RequirePackage{ifthen}
+
+\newcommand*{\thesis}[1]{\gdef\@thesis{#1}%
+}
+\newcommand*{\@thesis}{\texttt{\string\thesis\{inżynierska\}} lub \texttt{\string\thesis\{magisterska\}}}
+
+\newcommand*{\supervisor}[2][]{%
+    \gdef\@supervisorA{#2}
+    \IfNoValueTF{#1}{}{\gdef\@supervisorB{#1}}
+}
+
+\newcommand*{\doubletitle}[2]{%
+	\title{#1}
+    \gdef\@titleA{#1}
+    \IfNoValueTF{#2}{}{\gdef\@titleB{#2}}
+}
+
+\newcommand*{\indexnumber}[1]{\gdef\@indexnumber{#1}%
+}
+\newcommand*{\@indexnumber}{\texttt{\string\indexnumber} is not set}
+
+
+\renewcommand*{\maketitle}{%
+\begin{titlepage}
+	{
+	\centering
+
+	{\scshape\LARGE Politechnika Łódzka \par}
+	{\Large Wydział Elektrotechniki, Elektroniki, \par}
+	{\Large Informatyki i Automatyki \par}
+
+	\vfill
+
+	{\large Praca dyplomowa \@thesis\par}
+	\vspace{1cm}
+	{\Large\bfseries \@titleA\par}
+	\@ifundefined{@titleB}{}{
+		\vspace{1cm}
+		{\Large\bfseries \@titleB\par}
+	}
+	\vspace{2cm}
+	{\Large\bfseries \@author\par}
+	\vspace{1cm}
+	{Nr albumu: \@indexnumber\par}
+	}
+	
+	\vfill
+	\begin{flushright}
+	{Promotor: \\
+	\bfseries\@supervisorA\par}
+	{\hfill \break} 
+	\ifthenelse{\equal {\@supervisorB} {}}{}{
+		Opiekun pomocniczy: \\
+		\bfseries\@supervisorB\par
+	}
+	\end{flushright}
+	
+	\vfill
+	
+	{
+	\centering
+	{\large Łódź, \today\par}
+	}
+\end{titlepage}
+}
+\endinput

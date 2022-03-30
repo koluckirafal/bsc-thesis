@@ -1,0 +1,52 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{mathtools}
+\usepackage[MeX]{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{tocloft}
+\usepackage{lscape}
+\usepackage{breqn}
+\usepackage{asymptote}
+\usepackage{multicol}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{float}
+\usepackage{multicol}
+\usepackage{indentfirst}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{dmcsTitle}
+
+\author{Kołucki Rafał}
+\indexnumber{215514}
+\thesis{inżynierska}
+\supervisor[mgr Zbigniew Kulesza]{dr hab. inż. Mariusz Zubert}
+\doubletitle{Optymalizacja dostępu procesora do~magistrali systemowej na~platformie RISC-V}{Optimalization of~processor's access to~the~system bus on~the~RISC-V platform}
+
+\begin{document}
+
+\maketitle
+
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\tableofcontents
+
+\vfill
+
+\pagebreak
+
+\section*{Streszczenie}
+TODO: max 500 słów, po polski i po angielsku; ogólny zakres pracy, przedstawić główne uzyskane wyniki, zastosowane metody, nowatorstwo pracy i wyciągnięte wnioski.
+
+\pagebreak
+
+\include{intro/intro.tex}
+\include{soc-theory/soc-theory.tex}
+\include{tooling/tooling.tex}
+\include{implementation/implementation.tex}
+\include{testing/testing.tex}
+\include{summary/summary.tex}
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}
