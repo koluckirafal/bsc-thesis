@@ -1,9 +1,19 @@
 \section{Projektowanie, testowanie i uruchamianie układu SoC}
 \subsection{Konstruowanie układu SoC z użyciem frameworka LiteX}
-\todo[inline]{Przedstawienie frameworka LiteX\cite{https://doi.org/10.48550/arxiv.2005.02506}, opisanie projektowania od SoCCore do pełnego SoC z peryferiami; tez troche o builderze}
+O ile układ SoC można zaprojektować w całości od podstaw, częstą praktyką jest wykorzystywanie gotowych komponentów, często napisanych przez zewnętrznych dostawców, w celu szybszego zaprojektowania układu spełniającego założenia projektowe.
+
+Framework LiteX\cite{https://doi.org/10.48550/arxiv.2005.02506} dostarcza różnego rodzaju komponenty oraz narzędzia pozwalające na zbudowanie zarówno kompletnego układu SoC jak i bardziej specjalizowanych systemów w formie syntezowalnej logiki. W tym celu wykorzystuje bibliotekę Migen, która implementuje język opisu sprzętu w formie obiektów w języku Python. Dzięki temu możliwe jest opisanie logiki wykorzystując popularny język programowania wykorzystujący znajomą składnię, co zmniejsza barierę wejścia; oprócz tego można wykorzystać narzędzia z ekosystemu języka Python, dzięki czemu dostępne są między innymi większe możliwości parametryzacji logiki czy systemy do przeprowadzania testów automatycznych. Jednocześnie możliwe jest łączenie logiki napisanej w innych językach, co ułatwia wykorzystywanie komponentów nie będących częścią frameworka.
+
+\todo[inline]{Dalszy opis frameworka LiteX, opisanie projektowania od SoCCore do pełnego SoC z peryferiami; tez troche o builderze}
 
 \subsection{Symulowanie układu z użyciem LiteX i Verilator}
+LiteX zawiera modularne środowisko symulacji, które pozwala na wygenerowanie symulatora na podstawie opisanej w języku Migen logiki oraz parametrów dotyczących środowiska zewnętrznego. Możliwe jest dzięki temu przetestowanie układu oraz przeznaczonego na nie oprogramowania, przykładowo poprzez wykorzystanie wirtualnego interfejsu Ethernet do komunikacji. Ułatwia to usuwanie błędów z projektu układu jak i oprogramowania, zanim jeszcze układ zostanie zsyntetyzowany do formy bitstreamu dla układu FPGA.
+
 \todo[inline]{opisanie procesu zaczynając od soc i buildera, głównie opis sim_config i samej budowy symulatora}
 
 \subsection{Testowanie logiki z użyciem biblioteki cocotb}
+Standardową praktyką przy testowaniu układów logicznych jest pisanie tak zwanych test benchy, czyli skryptów wykorzystywanych do testowania logiki poprzez sterowanie sygnałami wejściowymi oraz porównywanie stanu sygnałów wyjściowych z oczekiwanymi wzorcami. Owe skrypty są zwykle pisane w tym samym języku, co testowany układ logiczny.
+
+Ze względu na wykorzystywanie języka Python w tej pracy do zaprojektowania układu SoC, dobrym pomysłem jest użycie go również w celu testowania logiki. W tym celu użyta została biblioteka cocotb, która pozwala na testowanie projektów zaimplementowanych w językach (System)Verilog i VHDL z użyciem skryptów napisanych w języku Python. Cocotb współpracuje z zarówno komercyjnymi jak i otwarto-źródłowymi symulatorami, dzięki czemu można tą bibliotekę wykorzystać w istniejących już środowiskach do projektowania układów logicznych.
+
 \todo[inline]{pisanie testbenchy w pythonie, napomknięcie o cocotbext-wishbone}
