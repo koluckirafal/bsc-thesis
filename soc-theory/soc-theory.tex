@@ -1,10 +1,33 @@
 \section{Budowa systemu jednoukładowego}
-TODO: opis przykładowego soc - jednostka centralna, magistrale, peryferia
+Układy typu System on Chip to układy, które na jednym podłożu półprzewodnikowym integrują wszystkie komponenty składające się na kompletny system mikroprocesorowy. Dzięki wysokiemu stopniu integracji układy te pozwoliły na znaczną miniaturyzację urządzeń elektronicznych bazujących na systemach mikroprocesorowych, takich jak telefony komórkowe czy komputery przenośne, oraz na ograniczenie kosztów przy większej skali produkcji.
+
+Pojedynczy układ SoC składa się z przynajmniej jednej jednostki centralnej, pamięci RAM i ROM pozwalających na uruchomienie kodu inicjalizującego układ, peryferiów pozwalających na komunikowanie się ze światem zewnętrznym oraz magistrali, która łączy wszystkie wcześniej wspomniane peryferia.
+
+Układy SoC odróżniają się od mikrokontrolerów tym, iż posiadają jednostki centralne o stosunkowo dużej mocy obliczeniowej, które pozwalają na uruchamianie pełnych systemów operacyjnych, takich jak Linux czy Microsoft Windows. Oprócz tego wymagają zewnętrznych pamięci RAM i ROM, gdyż nie integrują wymaganych ilości pamięci na potrzeby systemów operacyjnych i programów.
+
+\todo[inline]{rysunek przedstawiający budowę typowego SoC - jednostka centralna, magistrale, peryferia}
 
 \subsection{Opis wybranej implementacji procesora z ISA RISC-V}
 Na potrzeby tej pracy został wybrany projekt VexRiscv\cite{vexriscv:2018:Online}, który jest rdzeniem implementującym architekturę RISC-V w wariancie 32-bitowym, zoptymalizowanym pod kątem układów FPGA. Jego modularność z użyciem rozszerzeń na etapie budowania rdzenia pozwala na konfigurowanie parametrów w zależności od wymogów projektu, takich jak ilość etapów potoku wykonywania rozkazów, wspierane rozszerzenia architektury czy wielkość pamięci cache poziomu pierwszego.
 
-TODO: dokładniejszy opis procesora: ogólny schemat budowy, jakieś dodatkowe pomysły?
+\todo[inline]{dokładniejszy opis procesora: ogólny schemat budowy, jakieś dodatkowe pomysły?}
 
 \subsection{Przegląd dostępnych magistrali systemowych}
-TODO: napomknięcie o axi, avalon; wstępne opisanie wishbone
+
+Magistrale, jak zostało wspomniane w poprzednich podrozdziałach, służą do transferu danych między poszczególnymi komponentami systemu. Od ich parametrów zależy sprawność komunikacji między peryferiami - źle skonfigurowana magistrala może spowalniać działanie całego systemu, przykładowo poprzez ograniczenie przepływności danych.
+
+W celu wykorzystania danej szyny, wszystkie komponenty muszą mieć zaimplementowany interfejs, który pozwala na podłączenie się do danej magistrali. Jeśli któreś komponenty implementują interfejs innego mostka niż pozostałe, to można wykorzystać mostki, które pozwalają na konwersję między danymi standardami magistral.
+
+\todo[inline]{Topologie?}
+
+Istnieją różne standardy magistrali przeznaczone dla układów SoC, z czego bardziej znanymi są:
+
+\begin{itemize}
+	\item AMBA AXI od Arm Ltd.,
+	\item Avalon autorstwa firmy Altera (obecnie Intel),
+	\item Wishbone od Silicore Corporation (obecnie specyfikacja pod opieką Free and Open Source Silicon Foundation)
+\end{itemize}
+
+W ramach tej pracy wykorzystywana będzie magistrala Wishbone ze względu na w pełni dostępną publicznie, wolną od tantiemów specyfikację.
+
+\todo[inline]{Coś więcej o szynie wishbone (szczegóły implementacyjne dwa rozdziały dalej)?}
