@@ -1,8 +1,60 @@
 \section{Realizacja oraz testowanie optymalizacji wybranej magistrali systemowej}
+Ze względu na to, jak ważną rolę pełnią magistrale w systemie mikrokomputerowym, w tym rozdziale zostanie przeanalizowana specyfikacja magistrali Wishbone oraz jej implementacja w frameworku LiteX. Celem jest znalezienie części specyfikacji, które nie zostały zaimplementowane w LiteX, a które mogłyby przyspieszyć działanie systemu zbudowanego z jego wykorzystaniem.
+
+\todo[inline]{Dokładniejszy opis magistrali}
+
 \todo[inline]{co my dokładnie będziemy robić z tym wishbone?}
 
 \subsection{Rodzaje cykli na szynie Wishbone}
-\todo[inline]{opis classic i registered cycles, tak jak w specce i na przykładach}
+
+\subsubsection{Wishbone Classic Bus Cycles}
+Podstawowy rodzaj cykli na magistrali Wishbone opisany w specyfikacji.
+
+\todo[inline]{opis klasycznych cykli}
+
+W celu ograniczenia opóźnień przy transferze słów między kontrolerem a peryferium wykorzystuje się synchroniczne sygnały terminujące cykl. Wprowadza to jednak dodatkowe opóźnienie przy każdym słowie, gdyż peryferium nie jest świadome tego, że jest ponownie adresowane przy każdym kolejnym słowie - z tego powodu po odebraniu lub wystawieniu słowa peryferium neguje sygnał ACK w kolejnym takcie zegara. Oznacza to, że transfer każdego słowa w cyklu przypadają dwa takty zegara, zakładając, że peryferium nie potrzebuje dodatkowych opóźnień z innych powodów.
+
+\subsubsection{Wishbone Registered Feedback Bus Cycles}
+
+Rozwiązaniem problemu cykli opóźniających przy transferze każdego kolejnego słowa jest rozbudowa magistrali o dodatkowe sygnały sterujące, które pozwoliłyby na informowanie peryferiów, że w danym cyklu magistrali nastąpi transfer większej ilości słów. Dzięki temu peryferium może się przygotować do odebrania większej ilości danych bez konieczności potwierdzania odbioru po każdym słowie.
+
+Ten rodzaj zaawansowanego rodzaju sychronicznego terminowania cykli jest opisany w części specyfikacji "Wishbone Registered Feedback Bus Cycles". Dodaje ona dwa sygnały do magistrali, które są wykorzystywane do przenoszenia rodzaju cyklu oraz związanej z nim dodatkowej informacji.
+
+Sygnał CTI (Cycle Type Identifier) służy do identyfikowania rodzaju obecnie wykonywanego cyklu. Peryferium może wykorzystać tą informację, by przygotować się na kolejne części cyklu.
+\begin{center}
+\begin{tabular}{ r|l }
+ CTI[2:0] & opis \\ 
+ \hline
+ 0b000 & cykl klasyczny \\
+ 0b001 & cykl potokowy ze stałym adresem \\
+ 0b010 & cykl potokowy z inkrementacją adresu \\
+ 0b011 & zarezerwowane \\
+ 0b100 & zarezerwowane \\
+ 0b101 & zarezerwowane \\
+ 0b110 & zarezerwowane \\
+ 0b111 & zakończenie cyklu \\
+ \hline
+\end{tabular}
+\end{center}
+
+Sygnał BTI (Burst Type Extension) zawiera zaś dodatkowe informacje zależne od danego rodzaju aktualnego cyklu.
+Dla cyklu potokowego z inkrementacją adresu jego wartość można interpretować w następujący sposób:
+
+\begin{center}
+\begin{tabular}{ r|l }
+ BTE[1:0] & opis \\ 
+ \hline
+ 0b00 & liniowa inkrementacja adresu \\
+ 0b01 & inkrementacja adresu z zawijaniem 2 najmniej znaczących bitów \\
+ 0b10 & inkrementacja adresu z zawijaniem 3 najmniej znaczących bitów \\
+ 0b11 & inkrementacja adresu z zawijaniem 4 najmniej znaczących bitów \\
+ \hline
+\end{tabular}
+\end{center}
+
+
+
+Cykle potokowe inkrementujące adres z zawijaniem są zwykle wykorzystywane przy wypełnianiu linii pamięci podręcznej (cache) procesora.
 
 \subsection{Implementacja podzespołu z obsługą cykli transmisji seryjnej do stałego adresu}
 \todo[inline]{peryferium fifo, opis jak działa + logika od burstów}
