@@ -52,12 +52,30 @@ Dla cyklu potokowego z inkrementacją adresu jego wartość można interpretowa�
 \end{tabular}
 \end{center}
 
-
-
-Cykle potokowe inkrementujące adres z zawijaniem są zwykle wykorzystywane przy wypełnianiu linii pamięci podręcznej (cache) procesora.
+Cykle potokowe inkrementujące adres z zawijaniem są zwykle wykorzystywane przy wypełnianiu linii pamięci podręcznej (cache) procesora, zaś cykle potokowe ze stałym adresem przydatne są przy strumieniowaniu danych do konkretnego peryferium (na przykład przetwornika cyfrowo-analogowego) pod kontrolą dedykowanego podzespołu do szybkich transferów danych (np. kontroler Direct Memory Access).
 
 \subsection{Implementacja podzespołu z obsługą cykli transmisji seryjnej do stałego adresu}
-\todo[inline]{peryferium fifo, opis jak działa + logika od burstów}
 
-\subsection{Rozbudowanie wybranego podzespołu (SRAM) o obsługę cykli transmisji seryjnej z inkrementacją adresu}
+W celu zaznajomienia się z projektowaniem peryferiów komunikujących się poprzez interfejs Wishbone, pierwszym projektem było stworzenie minimalnego peryferium, które oprócz interfejsu Wishbone ma również wyprowadzenia, które można wykorzystać w celu komunikacji z podzespołem drogą inną niż poprzez magistralę Wishbone. Pozwoliłoby to na weryfikację poprawności działania komunikacji poprzez porównywanie danych, które zostały zapisane lub odebrane z kontrolera poprzez magistralę z tymi, które można odebrać lub nadać do peryferium inną drogą.
+
+\todo[inline]{schemat blokowy fifo_transceiver.py}
+
+Peryferium składa się z dwóch synchronicznych kolejek FIFO oraz logiki obsługującej magistralę Wishbone. Jedna kolejka FIFO służy do odbioru danych z zewnętrznego źródła, druga zaś odbiera dane z zewnętrznego źródła. Obie kolejki zostały podłączone do magistrali Wishbone z użyciem logiki zawierającej maszynę stanów skończonych, która zajmuje się sterowaniem sygnałami synchronizacji portów wewnętrznych kolejek w zależności od rodzaju operacji na magistrali (odczyt lub zapis). Zewnętrzne porty kolejek zostały wyprowadzone na zewnątrz peryferium bez dodatkowej logiki sterującej w celu ułatwienia przeprowadzenia testów na dalszych etapach pracy. Kolejki są dostępne jako gotowy element w module $migen.genlib$ będącej częścią biblioteki do opisu logiki Migen.
+
+\todo[inline]{schemat maszyny stanowej bez burstów}
+
+Maszyna stanowa składa się z trzech stanów: $IDLE$, $READ$ oraz $WRITE$.
+Stanem startowym jest $IDLE$. Gdy zostanie zainicjowany cykl transferu danych na magistrali poprzez zasertowanie sygnałów CYC oraz STB, maszyna w kolejnym takcie zegara przejdzie do stanu $READ$ lub $WRITE$, w zależności od stanu sygnału WE na magistrali.
+Przy stanie $WRITE$ sprawdzany jest stan sygnału $writable$ na wewnętrznym porcie wyjściowej kolejki FIFO. Jeśli kolejka nie jest zapełniona, są asertowane sygnały: $WE$ portu zapisu kolejki, powodujący zapisanie słowa wystawionego na magistrali do kolejki oraz $ACK$ magistrali, który służy do informowania kontrolera szyny, że transmisja została potwierdzona. W przypadku, gdy kolejka jest zapełniona, sygnały $ACK$ magistrali oraz $WE$ kolejki nadawczej są negowane - w ten sposób kontroler magistrali wie, że peryferium nie może potwierdzić przetworzenia odebranego słowa.
+Podobnie funkcjonuje to przy stanie $READ$ maszyny, jednak w tym wypadku potwierdzenie transmisji zależy od tego, czy w kolejce znajduje się przynajmniej jedno słowo, które można odczytać z kolejki - o obecności danych w kolejce informuje sygnał $readable$ kolejki odbiorczej, zaś potwierdzenie odczytania słowa w kolejce jest potwierdzane poprzez zasertowanie sygnału $RE$ kolejki odbiorczej.
+
+Z reguły 4.35 opisanej w specyfikacji interconnectu Wishbone wynika fakt, że w trakcie trwania cyklu potokowego ze stałym adresem nie mogą zmienić się następujące sygnały magistrali: linia adresowa, linia wybierająca $SEL$ oraz wybór operacji $WE$. Wobec tego można założyć, że cykl rozpoczęty operacją zapisu będzie w kolejnych taktach zegara przekazywał kolejne słowa do odebrania przez podzespół.
+
+\todo[inline]{schemat maszyny stanowej z podkreślonymi akcjami przy CTI == 0b001}
+
+W celu kontynuowania cyklu przy każdym takcie zegara sprawdzane są następujące warunki: czy cykl dalej jest aktywny (sygnały $CYC$ i $STB$ są aktywne) oraz czy sygnał przekazujący rodzaj cyklu $CTI$ ma wartość $0b001$, który oznacza cykl potokowy ze stałym adresem. Jeśli oba te warunki są spełnione, zaś maszyna stanowa sterująca sygnałami sterującymi kolejek oraz interfejsu magistrali, to ponawiamy obecny stan maszyny w następnym takcie zegara. Dzięki temu w każdym takcie zegara kolejne słowa zostaną odebrane z kolejki odbiorczej albo dodane do kolejki nadawczej w podzespole, bez inicjalizowania cyklu magistrali na nowo.
+
+\todo[inline]{przebiegi prezentujące różnicę (albo to dopiero przy testowaniu pokazać)}
+
+\subsection{Rozbudowanie istniejącego podzespołu (SRAM) o obsługę cykli transmisji seryjnej z inkrementacją adresu}
 \todo[inline]{soc/interconnect/wishbone.WishboneSRAM - opis działania + logiki burstów}
