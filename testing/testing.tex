@@ -1,11 +1,23 @@
 \section{Realizacja testów i analiza ich wyników}
 \todo[inline]{co będzie robione w celu przeanalizowania wpływu zmian w logice peryferiów?}
+Po zmodyfikowaniu podzespołu należy sprawdzić, czy oryginalna funkcjonalność nie została w jakiś sposób naruszona oraz czy dodana funkcjonalność działa zgodnie z założeniami. W tym celu podzespół należy poddać procesowi weryfikacji. Można jej dokonać na różne sposoby, zaczynając od testów jednostkowych i integracyjnych, kończąc zaś na weryfikacji formalnej.
+Weryfikacja formalna jest dokładniejsza ze względu na wykorzystywanie formalnych metod matematycznych, zajmuje jednak znacznie więcej czasu ze względu na konieczność opisania w formie matematycznej oczekiwanego zachowania układu. Wobec tego zostanie wykorzystana prostsza metoda testów jednostkowych - polega ona na opisaniu sekwencji sygnałów wejściowych testowanego komponentu oraz instrukcji pozwalających na interpretację stanów wyjściowych poprzez porównywanie ich do oczekiwanych wzorców.
 
 \subsection{Analiza i porównanie przebiegów aktywności magistrali}
-\todo[inline]{po co w ogóle te wszystkie testy?}
+\todo[inline]{po co nam konkretnie te wszystkie testy?}
+Wspomniane testy jednostkowe zostaną wykorzystane w kontekście tej pracy do sprawdzenia, czy dane są poprawnie odczytywane i zapisywane w pamięci Block RAM z wykorzystaniem zarówno klasycznych jak i potokowych cykli operacji na magistrali Wishbone. W tym celu każdy test wygeneruje sekwencję słów oraz adresów docelowych, które będą wykorzystywane zarówno do wytworzenia sygnałów wejściowych oraz jako wzorzec, do którego będzie porównywany stan końcowy testowanej pamięci.
+Ze względu na to, iż obserwujemy wyłącznie stan zewnętrzny, do pamięci Block RAM dostanie dodany drugi port, który będzie pozwalał na dokonywanie operacji na pamięci z pominięciem interfejsu Wishbone.
 
 \subsubsection{Implementacja testów jednostkowych dla peryferiów}
-\todo[inline]{Opisanie procesu testowania peryferiów (harness i same testy)}
+Testy zostały zrealizowane z użyciem języka Python, wykorzystując bibliotekę Cocotb, która umożliwia tworzenie środowiska testowego z użyciem składni języka Python zamiast w Verilogu. Pozwala to na integrację z bibliotekami ekosystemu języka Python, ułatwiając takie sprawy jak generowanie testowego zbioru danych.
+Oprócz tego wykorzystane zostały biblioteki cocotb-test oraz cocotbext-wishbone. Cocotb-test integruje Cocotb z systemem testów automatycznych pytest, dzięki czemu napisane testy można uruchamiać z różnymi ustawieniami, co w połączeniu z parametryzacją samych testów umożliwia pokrycie różnych sposobów komunikacji z testowanym podzespołem na magistrali. Cocotbext-wishbone zaś implementuje funkcje do sterowania i monitorowania sygnałów na magistrali Wishbone, co pozwala zaoszczędzić czas poprzez wywoływanie gotowych funkcji realizujących operacje na magistrali zamiast poprzez ręczne sterowanie szyną.
+
+Testowane peryferia, czyli pamięć SRAM oraz transceiver FIFO, zostały zainstancjonowane w minimalnym module LiteX, który na zewnątrz udostępnia wspólną magistralę Wishbone, drugi port pamięci SRAM, wyjście nadawczej kolejki FIFO oraz wejście odbiorczej kolejki FIFO. W ten sposób mamy dostęp do wszystkich sygnałów, które posłużą do wysterowania magistrali oraz komunikacji z peryferiami inną drogą, umożliwiając obserwowanie wpływu implementacji interfejsu Wishbone na komunikację z peryferiami. Jako że biblioteka Cocotb oczekuje opisu układu w języku Verilog, moduł LiteX jest eksportowany do pliku Verilog przed rozpoczęciem wykonywania testów.
+
+\todo[inline]{struktura folderu z testami (harness i same testy)}
+
+\subsubsection{Procedura wykonywania testów}
+\todo[inline]{opisanie działania testów}
 
 \subsubsection{Porównanie wyników testów}
 \todo[inline]{przebiegi dla komponentów z c3 przed i po dodaniu burstów}
@@ -21,3 +33,5 @@
 
 \subsubsection{Wyniki testów wydajnościowych}
 \todo[inline]{tabelki i wstępne przemyślenia}
+
+%\subsection{CFU Plauground - w razie jakby nie udało się wycisnąć mininalnej ilości tekstu}
