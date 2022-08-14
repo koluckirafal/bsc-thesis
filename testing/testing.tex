@@ -17,19 +17,29 @@ Testowane peryferia, czyli pamięć SRAM oraz transceiver FIFO, zostały zainsta
 \todo[inline]{struktura folderu z testami (harness i same testy)}
 
 \subsubsection{Procedura wykonywania testów}
-\todo[inline]{opisanie działania testów}
+Zbiór testów jest wykonywany z użyciem komendy pytest, która jest częścią biblioteki o tej samej nazwie. Według deficji testów z pliku test.py generowana jest lista testów z różnymi kombinacjami parametrów według podanych przedziałów. Dzięki temu z czterech rodzajów testów (cykl klasyczny oraz wybrany cykl potokowych dla peryferium FIFO oraz modułu SRAM) otrzymano zbiór xxx testów, które zostają wykonywane po kolei. Po zakończeniu testów program pytest zwraca ich wyniki, które można zapisać również w formacie HTML. Umożliwia to wyfiltrowanie przypadków, dla których testy nie kończą się zgodnie z oczekiwaniami.
 
 \subsubsection{Porównanie wyników testów}
 \todo[inline]{przebiegi dla komponentów z c3 przed i po dodaniu burstów}
 
 \subsection{Testy wydajnościowe systemu jednoukładowego na symulatorze oraz na układzie FPGA}
 \todo[inline]{wstęp - opisanie procesu benchmarkowania, platformy docelowe}
+Po zweryfikowaniu poprawności działania peryferiów kolejnym etapem jest przeprowadzenie testów wydajnościowych. Polegać one będą na wykonaniu testowego układu SoC, który zawierać będzie peryferium w wariancie zarówno zmodyfikowanym jak i oryginalnym. Na tym układzie uruchamiany będzie program, który będzie mierzyć prędkość operacji odczytu i zapisu zbioru danych w kolejności sekwencyjnej i losowej. Pozwoli to na zbadanie wpływu obsługi transferów potokowych na szybkość wykonywania operacji.
 
 \subsubsection{Testowy układ SoC i jego architektura}
-\todo[inline]{Opisz bitstream.py, TestSoC, ArtySoC, SimSoC}
+Testowy system mikroprocesorowy składa się z procesora VexRiscv, czterech bloków pamięci SRAM, interfejsu UART do komunikacji między programem testowym a użytkownikiem oraz niewykorzystanych bloków interfejsu Ethernet i analizatora stanów logicznych.
+Procesor VexRiscv został skonfigurowany z pamięcią podręczną danych wielkości XX kibibajtów oraz z obsługą architektury RV32xx - obecność pamięci podręcznej jest szczególnie ważna, gdyż to właśnie na jej potrzeby procesor zawiera wsparcie dla transferów potokowych na magistrali Wishbone.
+Z czterech pamięci SRAM dwa są w trybie tylko do odczytu - zawierać będą program rozruchowy oraz program testowy, które załadowane będą jako część bitstreamu dla układu FPGA.
+
+\todo[inline]{schemat blokowy TestSoC}
 
 \subsubsection{Program dla jednostki centralnej RISC-V badający szybkość operacji na pamięci}
-\todo[inline]{opisz co kod robi - memtest i memspeed, trochę o tracingu}
+
+Program testowy, zaimplementowany w języku C, testuje wybrany obszar pamięci poprzez zapisanie oraz odczytanie całego obszaru. Test ten jest wykonywany na dwa sposoby: dokonując operacji na kolejnych oraz losowy adresach.
+Funkcje odpowiadające za przeprowadzenie testu są dostępne w ramach biblioteki libbase, będącej częścią frameworka LiteX - o ile funkcje można wywołać z poziomu konsoli programu rozruchowego, to program na etapie budowania zapisuje adres startowy oraz pojemność testowanej pamięci przekazany przez skrypt budujący gateware, pozwalając na automatyczne wykonanie testu w momencie załadowania bitstreamu na układ FPGA lub uruchomienia symulatora.
+Dodatkową funkcjonalnością, dostępną w przypadku uruchomienia testu w symulacji, jest śledzenie wykonywania poprzez możliwość zapisywania "flagi" pod określonym wcześniej adresem - zawartość tego adresu jest potem zapisywana w pliku z przebiegami sygnałów emulowanego systemu, dzięki czemu można zbadać, jakie operacje na magistrali są wykonywane w danym fragmencie testu.
+
+\todo[inline]{struktura programu, sposób kompilacji?}
 
 \subsubsection{Wyniki testów wydajnościowych}
 \todo[inline]{tabelki i wstępne przemyślenia}

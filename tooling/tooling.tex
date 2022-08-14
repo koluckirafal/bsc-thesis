@@ -9,7 +9,13 @@ Framework LiteX\cite{https://doi.org/10.48550/arxiv.2005.02506} dostarcza różn
 \subsection{Symulowanie układu z użyciem LiteX i Verilator}
 LiteX zawiera modularne środowisko symulacji, które pozwala na wygenerowanie symulatora na podstawie opisanej w języku Migen logiki oraz parametrów dotyczących środowiska zewnętrznego. Możliwe jest dzięki temu przetestowanie układu oraz przeznaczonego na nie oprogramowania, przykładowo poprzez wykorzystanie wirtualnego interfejsu Ethernet do komunikacji. Ułatwia to usuwanie błędów z projektu układu jak i oprogramowania, zanim jeszcze układ zostanie zsyntetyzowany do formy bitstreamu dla układu FPGA.
 
-\todo[inline]{opisanie procesu zaczynając od soc i buildera, głównie opis sim_config i samej budowy symulatora}
+W celu uruchomienia naszego systemu w symulatorze, układ musi być skonfigurowany do zbudowania z użyciem narzędzi symulacyjnych zamiast narzędziami syntezy dedykowanych konkretnemu układowi FPGA. W tym celu LiteX integruje obsługę programu Verilator w celu konwersji układu do kodu komputerowego w formie źródłowej. Ów program linkowany jest z tak zwanym "wrapperem", który łączy naszą logikę z dodatkowymi modułami, które symulują wybrane peryferia z użyciem zasobów systemu operacyjnego, na którym symulacja będzie wykonywana. W przypadku tego projektu będzie to interfejs szeregowy UART dostępny w formie standardowego strumienia wejścia/wyjścia oraz niewykorzystany interfejs Ethernet w formie wirtualnego interfejsu sieciowego w systemie hosta. W ten sposób symulacja układu nie różni się znacząco od wykonywania programu komputerowego, co ułatwia interakcję z programem wykonywanym w wirtualnym środowisku.
+
+\todo[inline]{modele wspierane przez LiteX Sim}
+
+W praktyce zbudowanie symulatora układu polega na podmianie wybranych peryferiów na modele, które są wspierane przez Verilator, oraz na opisaniu wykorzystywanych modułów oraz sposobu dostępu do nich z poziomu systemu operacyjnego hosta.
+
+\todo[inline]{sim_config podawany do builder.build()}
 
 \subsection{Testowanie logiki z użyciem biblioteki cocotb}
 Standardową praktyką przy testowaniu układów logicznych jest pisanie tak zwanych test benchy, czyli skryptów wykorzystywanych do testowania logiki poprzez sterowanie sygnałami wejściowymi oraz porównywanie stanu sygnałów wyjściowych z oczekiwanymi wzorcami. Owe skrypty są zwykle pisane w tym samym języku, co testowany układ logiczny.

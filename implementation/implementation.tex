@@ -1,9 +1,18 @@
 \section{Realizacja oraz testowanie optymalizacji wybranej magistrali systemowej}
 Ze względu na to, jak ważną rolę pełnią magistrale w systemie mikrokomputerowym, w tym rozdziale zostanie przeanalizowana specyfikacja magistrali Wishbone oraz jej implementacja w frameworku LiteX. Celem jest znalezienie części specyfikacji, które nie zostały zaimplementowane w LiteX, a które mogłyby przyspieszyć działanie systemu zbudowanego z jego wykorzystaniem.
 
-\todo[inline]{Dokładniejszy opis magistrali}
+\subsection{Budowa magistrali Wishbone}
+Specyfikacja magistrali Wishbone definiuje wiele sygnałów, z których w praktyce wykorzystuje się wyłącznie część z nich. W podstawowych zastosowaniach wykorzystywane są następujące sygnały, opisywane z perspektywy inicjatora (mastera):
+\begin{itemize}
+    \item sygnały zegarowe i resetujące CLK oraz RST,
+    \item szyna adresowa ADR_O,
+    \item szyny danych DAT_I oraz DAT_O,
+    \item sygnały synchronizacji CYC_O, STB_O oraz ACK_I,
+    \item sygnał odczytu/zapisu WE_O,
+    \item selektor bajtów słowa SEL_O
+\end{itemize}
 
-\todo[inline]{co my dokładnie będziemy robić z tym wishbone?}
+Szerokość szyn danych zależy od wielkości słowa, jakie mają być przesyłane w jednym cyklu zegara. Szerokość szyny adresowej zależy od tego, jaką przestrzeń adresową chcemy zaadresować. Magistrala wykorzystuje adresowanie po słowach - jeśli pożądana jest operacja na mniejszej jednostce, np. bajcie, wykorzystywany jest sygnał SEL_O w celu wybrania fragmentu słowa na szynie danych, które druga strona może wykorzystać.
 
 \subsection{Rodzaje cykli na szynie Wishbone}
 
@@ -78,4 +87,35 @@ W celu kontynuowania cyklu przy każdym takcie zegara sprawdzane są następują
 \todo[inline]{przebiegi prezentujące różnicę (albo to dopiero przy testowaniu pokazać)}
 
 \subsection{Rozbudowanie istniejącego podzespołu (SRAM) o obsługę cykli transmisji seryjnej z inkrementacją adresu}
-\todo[inline]{soc/interconnect/wishbone.WishboneSRAM - opis działania + logiki burstów}
+
+Peryferium SRAM, będący częścią biblioteki rdzeni w frameworku LiteX, składa się z dwóch części: synchronicznej pamięci (z biblioteki Migen) o zdefiniowanej szerokości słowa i pojemności (liczonej w słowach) oraz z interfejsu Wishbone, który łączy wspomnianą pamięć z magistralą.
+
+\todo[inline]{soc/interconnect/wishbone.WishboneSRAM - schemat budowy}
+
+Interfejs implementuje wyłącznie podstawowy rodzaj cykli - jako, że wybrany procesor obsługuje potokowe transfery danych, będziemy w stanie, po rozbudowaniu implementacji interfejsu w module SRAM, zweryfikować wpływ obsługi transferów potokowych na praktyczną wydajność systemu mikroprocesorowego.
+
+W celu dodania obsługi transferów potokowych do modułu SRAM należy rozbudować interfejs o następujące elementy: generator adresów, wykorzystywany do wyznaczania kolejnych adresów pamięci w każdym cyklu zegara; dodatkowy warunek w logice kombinatoryjnej odpowiedzialnej za generowanie sygnału potwierdzenia ACK; logika przekazywania wyznaczonych adresów.
+
+Zakładamy, że wewnętrzny moduł pamięci RAM jest w stanie wykonywać kolejne operacje w każdym takcie zegara, tj. w każdym takcie zegara można wykonać operację odczytu lub zapisu słowa pod dowolnym adresem.
+Kolejnym założeniem, wynikającym ze specyfikacji magistrali, jest niezmienność sygnałów CTI oraz BTE informujących o rodzaju cyklu w czasie jego trwania, z wyłączeniem stanu sygnału CTI informującym o zakończeniu cyklu potokowego.
+
+\subsubsection{Detekcja rodzaju cyklu}
+
+Strona inicjująca połączenie informuje o rodzaju cyklu poprzez sygnał CTI. Jeśli jedna ze stron transferu nie obsługuje wybranego typu cyklu, wtedy transfer przebiega jak w cyklu klasycznym (jeden transfer - jeden cykl).
+Z dwóch zdefiniowanych w specyfikacji rodzajów cykli potokowych, ze stałym adresem oraz inkrementacją adresu, w przypadku pamięci RAM interesuje nas cykl potokowy z inkrementacją adresu. W tym celu wykorzystamy warunek kombinacyjny, który w wypadku wystąpienia wspieranego rodzaju cyklu asertuje sygnał informujący o żądaniu transferu potokowego.
+Oprócz tego definiujemy wektor adr_counter_base, w którym będzie zawarty adres bazowy z wyłączeniem bitów, które będą wykorzystywane w przypadku inkrementacji adresu z zapętleniem najmniej znaczących bitów.
+
+\subsubsection{Generator sekwencji adresów}
+
+Gdy cykl zostanie rozpoczęty poprzez zasertowanie sygnałów CYC i STB oraz inicjator połączenia zażąda transferu potokowego, inicjalizowany jest licznik adresów. Jest on wykorzystywany do generowania kolejnych adresów, do których dostęp strona inicjalizująca połączenie chce mieć dostęp w kolejnych taktach zegara bez oczekiwania na podanie kolejnych adresów. Gdy adres został zapisany w liczniku, w kolejnych taktach zegara licznik będzie inkrementowany o 1.
+Jednocześnie w dodatkowym rejestrze, nazwanym `adr_counter_offset' zapisywane są dolne bity pierwszego zażądanego adresu. Zawartość tego dodatkowego rejestru będzie wykorzystywana do wyliczenia dolnych bitów dolnego adresu, jeśli inkrementacja adresu ma następywać z zawijaniem dolnych bitów.
+
+Gdy inicjator cyklu informuje o zakończeniu transferu potokowego poprzez ustawienie odpowiedniej wartości na sygnale CTI, licznik jest zerowany i zatrzymywany, by przy kolejnych taktach zegara nie wykonywać nadmiarowych operacji w pamięci.
+
+W części kombinacyjnej generatora następny adres jest wyznaczany poprzez zsumowanie dwóch sygnałów, gdzie jeden sygnał zawiera wartość licznika bez zawijanych bitów adresu, zaś drugi sygnał zawiera dolne bity adresu wyznaczone poprzez zsumowanie zawartości licznika i rejestru zawierającego dolne bity adresu początkowego, z których wykorzystywane są wyłącznie zawinięte bity.
+
+Wyznaczany adres, jeśli licznik jest uruchomiony, jest przekazywany w logice kombinacyjnej do linii adresowej modułu pamięci RAM - w przeciwnym wypadku adres do pamięci RAM jest przekazywany bezpośrednio z magistrali, wliczając pierwszy adres przy transferach potokowych.
+
+\subsubsection{Generowanie sygnału potwierdzenia}
+
+Logika synchroniczna odpowiedzialna za generowanie sygnału ACK została zmodyfikowana w nieznaczny sposób, poprzez dodanie warunku OR dla znegowanego sygnału ACK z poprzedniego taktu oraz wewnętrznego sygnału informującego o aktywnym transferze potokowym. W ten sposób sygnał ACK jest aktywny w każdym takcie zegara przy transferach potokowych, zaś przy klasycznych cyklach zachowanie jest to samo co poprzednio, czyli sygnał ACK jest natychmiastowo negowany w drugim takcie zegara po rozpoczęciu transferu.
