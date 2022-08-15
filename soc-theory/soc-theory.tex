@@ -1,16 +1,49 @@
-\section{Budowa systemu jednoukładowego}
+\section{Systemy jednopłytkowe}
+
+\subsection{Komputery jednopłytkowe}
+
+Komputery jednopłytkowe, których istnienie zawdzięczyć można postępowi miniaturyzacji układów scalonych, to systemy komputerowe, które zawierają całą wymaganą funkcjonalność na pojedynczej płytce drukowanej. Od typowego systemu komputerowego różni je to, że zwykle nie posiadają gniazd rozszerzeń, które byłyby wykorzystywane do rozbudowania komputera o dodatkowe lub czasami nawet wymagane rozszerzenia, które byłyby potrzebne w wybranym zastosowaniu danego systemu komputerowego. Pozwala to na zredukowanie ceny kosztem ograniczonych możliwości rozbudowy komputera.
+
+Pierwsze komputery jednopłytkowe powstały w roku 1976 (MMD-1 firmy E\&L Instruments), często w formie zestawu do samodzielnego złożenia i uruchomienia. Były one tańszą alternatywą dla większych systemów komputerowych, oferując podstawowe peryferia wymagane do tworzenia oprogramowania i interakcji z nim.
+W późniejszych czasach komputery jednopłytkowe były coraz częściej wykorzystywane w systemach przemysłowych, głównie z powodu większej integracji komponentów i większej wytrzymałości niż systemy złożone z większej ilości elementów takich jak karty rozszerzeń.
+
+Po upowszechnieniu się standardów takich jak IBM PC, część komputerów jednopłytkowych powstających w późniejszym czasie wykorzystywały elementy architektury IBM PC w celu umożliwienia wykonywania programów oryginalnie przeznaczonych dla komputerów zgodnych z tymi standardami. Ułatwiło to rozwijanie oprogramowania dla komputerów jednopłytkowych poprzez możliwość wykorzystania tych samych narzędzi takich jak kompilatory.
+
+Obecnie komputery jednopłytkowe większość funkcjonalności mają zawarte w pojedynczym układzie, zwanym System on Chip (system jednoukładowy). Poprzez redukcję ilości elementów na płytce drukowanej możliwym było zredukowanie rozmiarów komputerów jednopłytkowych, czasami zbliżając się rozmiarami do karty bankowej.
+
+Przykładami popularnych obecnie komputerów jednopłytkowych, zbudowanych z użyciem układów SoC, są:
+\begin{itemize}
+	\item Raspberry Pi (Raspberry Pi Trading, Ltd.)
+	\item BeagleBoard (Texas Instruments, BeagleBoard.org Foundation)
+	\item Orange Pi (Shenzhen Xunlong Software Co., Ltd.)
+\end{itemize}
+
+\subsection{Definicja układu System on Chip w porównaniu z mikrokontrolerem}
+
 Układy typu System on Chip to układy, które na jednym podłożu półprzewodnikowym integrują wszystkie komponenty składające się na kompletny system mikroprocesorowy. Dzięki wysokiemu stopniu integracji układy te pozwoliły na znaczną miniaturyzację urządzeń elektronicznych bazujących na systemach mikroprocesorowych, takich jak telefony komórkowe czy komputery przenośne, oraz na ograniczenie kosztów przy większej skali produkcji.
 
-Pojedynczy układ SoC składa się z przynajmniej jednej jednostki centralnej, pamięci RAM i ROM pozwalających na uruchomienie kodu inicjalizującego układ, peryferiów pozwalających na komunikowanie się ze światem zewnętrznym oraz magistrali, która łączy wszystkie wcześniej wspomniane peryferia.
+Pojedynczy układ SoC składa się z przynajmniej jednej jednostki centralnej, pamięci RAM i ROM pozwalających na uruchomienie kodu inicjalizującego układ, peryferiów pozwalających na komunikowanie się ze światem zewnętrznym oraz jednej lub więcej magistral, które łączą wcześniej wspomniane peryferia.
 
-Układy SoC odróżniają się od mikrokontrolerów tym, iż posiadają jednostki centralne o stosunkowo dużej mocy obliczeniowej, które pozwalają na uruchamianie pełnych systemów operacyjnych, takich jak Linux czy Microsoft Windows. Oprócz tego wymagają zewnętrznych pamięci RAM i ROM, gdyż nie integrują wymaganych ilości pamięci na potrzeby systemów operacyjnych i programów.
+Układy SoC odróżniają się od mikrokontrolerów tym, iż zawierają w sobie jak największą funkcjonalność możliwą do zmieszczenia w określonym rozmiarze fizycznym, uwzględniając takie ograniczenia jak dostępny proces technologiczny. Mikrokontrolery za to posiadają ograniczoną ilość peryferiów oraz mocy obliczeniowej w celu redukcji kosztów, co jest ważne w przypadku urządzeń wymagających specyficznej funkcjonalności w ograniczonym budżecie.
 
-\todo[inline]{rysunek przedstawiający budowę typowego SoC - jednostka centralna, magistrale, peryferia}
+Typowy układ SoC posiada przynajmniej jedną jednostkę centralną o stosunkowo dużej mocy obliczeniowej, które pozwalają na uruchamianie pełnoprawnych systemów operacyjnych, takich jak Linux czy Microsoft Windows. Oprócz tego wymagają dodatkowo zewnętrznych pamięci RAM i ROM, gdyż oprogramowanie, które będzie uruchamiane na danym układzie, wymaga często dużych ilości pamięci, której nie da się zintegrować w samym układzie SoC.
+
+\todo[inline]{RYSUNEK: budowa SoC - jednostka centralna, magistrala, peryferia}
 
 \subsection{Opis wybranej implementacji procesora z ISA RISC-V}
-Na potrzeby tej pracy został wybrany projekt VexRiscv\cite{vexriscv:2018:Online}, który jest rdzeniem implementującym architekturę RISC-V w wariancie 32-bitowym, zoptymalizowanym pod kątem układów FPGA. Jego modularność z użyciem rozszerzeń na etapie budowania rdzenia pozwala na konfigurowanie parametrów w zależności od wymogów projektu, takich jak ilość etapów potoku wykonywania rozkazów, wspierane rozszerzenia architektury czy wielkość pamięci cache poziomu pierwszego.
 
-\todo[inline]{dokładniejszy opis procesora: ogólny schemat budowy, jakieś dodatkowe pomysły?}
+Na potrzeby tej pracy został wybrany projekt VexRiscv\cite{vexriscv:2018:Online}, który jest rdzeniem implementującym architekturę RISC-V w wariancie 32-bitowym (RV32I), zoptymalizowanym pod kątem układów FPGA. Jego modularność z użyciem rozszerzeń pozwala na konfigurowanie parametrów na etapie budowania rdzenia w zależności od wymogów projektu, takich jak ilość etapów potoku wykonywania rozkazów, wspierane rozszerzenia architektury czy wielkość pamięci cache poziomu pierwszego.
+
+Wśród dostępnych opcji konfiguracyjnych są takie elementy jak:
+\begin{itemize}
+	\item opcjonalne rozkazy z rozszerzeń MAFDC zdefiniowanych dla architektury RISC-V,
+	\item regulowana długość potoku wykonawczego od 2 do 5 stopni,
+	\item możliwość podłączenia procesora do dowolnej magistrali, z czego dostępne są adaptery dla magistral AXI4, Avalon oraz Wishbone,
+	\item opcjonalna pamięć podręczna programu i danych, każda w dowolnej ilości,
+	\item opcjonalna jednostka zarządzania pamięcią (MMU)
+\end{itemize}
+
+Na potrzeby tego projektu używa zostanie podstawowa konfiguracja, nie zawierająca dodatkowych rozkazów, ze względu na ograniczone zasoby układu FPGA, na którym realizowane będą testy wydajnościowe; oprócz tego dodana zostanie pamięć podręczna danych, która odpowiedzialna będzie za buforowanie odczytywanych danych.
 
 \subsection{Przegląd dostępnych magistrali systemowych}
 
@@ -18,16 +51,21 @@ Magistrale, jak zostało wspomniane w poprzednich podrozdziałach, służą do t
 
 W celu wykorzystania danej szyny, wszystkie komponenty muszą mieć zaimplementowany interfejs, który pozwala na podłączenie się do danej magistrali. Jeśli któreś komponenty implementują interfejs innego mostka niż pozostałe, to można wykorzystać mostki, które pozwalają na konwersję między danymi standardami magistral.
 
-\todo[inline]{Topologie?}
-
 Istnieją różne standardy magistrali przeznaczone dla układów SoC, z czego bardziej znanymi są:
-
 \begin{itemize}
 	\item AMBA AXI od Arm Ltd.,
 	\item Avalon autorstwa firmy Altera (obecnie Intel),
 	\item Wishbone od Silicore Corporation (obecnie specyfikacja pod opieką Free and Open Source Silicon Foundation)
 \end{itemize}
 
+\todo[inline]{Coś więcej o magistralach}
+
 W ramach tej pracy wykorzystywana będzie magistrala Wishbone ze względu na w pełni dostępną publicznie, wolną od tantiemów specyfikację.
 
-\todo[inline]{Coś więcej o szynie wishbone (szczegóły implementacyjne dwa rozdziały dalej)?}
+\subsection{Topologie połączeń}
+
+\todo[inline]{Rodzaje topologii magistral}
+
+\subsection{Wnioski}
+
+\todo[inline]{Wnioski}

@@ -1,11 +1,15 @@
 NAME=215514_rafal_kolucki_inz
+LATEXMK=latexmk -xelatex
 
 .PHONY: all
 
 all: $(NAME).pdf
 
 $(NAME).pdf: $(NAME).tex
-	latexmk -xelatex $^
+	$(LATEXMK) $^
+
+preview: $(NAME).tex
+	$(LATEXMK) -pvc $^
 
 read: $(NAME).pdf
 	xdg-open $^
