@@ -13,16 +13,123 @@ Ze względu na to, iż obserwujemy wyłącznie stan zewnętrzny, do pamięci Blo
 Testy zostały zrealizowane z użyciem języka Python, wykorzystując bibliotekę Cocotb, która umożliwia tworzenie środowiska testowego z użyciem składni języka Python zamiast w Verilogu. Pozwala to na integrację z bibliotekami ekosystemu języka Python, ułatwiając takie sprawy jak generowanie testowego zbioru danych.
 Oprócz tego wykorzystane zostały biblioteki cocotb-test oraz cocotbext-wishbone. Cocotb-test integruje Cocotb z systemem testów automatycznych pytest, dzięki czemu napisane testy można uruchamiać z różnymi ustawieniami, co w połączeniu z parametryzacją samych testów umożliwia pokrycie różnych sposobów komunikacji z testowanym podzespołem na magistrali. Cocotbext-wishbone zaś implementuje funkcje do sterowania i monitorowania sygnałów na magistrali Wishbone, co pozwala zaoszczędzić czas poprzez wywoływanie gotowych funkcji realizujących operacje na magistrali zamiast poprzez ręczne sterowanie szyną.
 
-\todo[inline]{LISTING: struktura katalogu test/}
+\todo[inline]{DIAGRAM: pipeline testów}
 
 Testowane peryferia, czyli pamięć SRAM oraz transceiver FIFO, zostały zainstancjonowane w minimalnym module LiteX, który na zewnątrz udostępnia wspólną magistralę Wishbone, drugi port pamięci SRAM, wyjście nadawczej kolejki FIFO oraz wejście odbiorczej kolejki FIFO. W ten sposób mamy dostęp do wszystkich sygnałów, które posłużą do wysterowania magistrali oraz komunikacji z peryferiami inną drogą, umożliwiając obserwowanie wpływu implementacji interfejsu Wishbone na komunikację z peryferiami. Jako że biblioteka Cocotb oczekuje opisu układu w języku Verilog, moduł LiteX jest eksportowany do pliku Verilog przed rozpoczęciem wykonywania testów.
 
-\todo[inline]{LISTING: harness}
+\begin{longlisting}
+\begin{minted}{python}
+# wycięte: klasa _CRG definiująca wyprowadzenia modułu głównego
+class BaseSoC(SoCCore):
+    # wycięte: opis przerwań i adresów startowych peryferiów
+
+    def __init__(self, platform, output_dir="build", **kwargs):
+        self.output_dir = output_dir
+
+        clk_freq = int(12e6)
+        self.submodules.crg = _CRG(platform)
+
+        # Inicjalizacja podstawowego szkieletu systemu jednoukładowego
+        SoCCore.__init__(self, platform, clk_freq,
+                         cpu_type=None, integrated_rom_size=0x0,
+                         integrated_sram_size=0x100,
+                         bus_bursting=True,
+                         integrated_main_ram_size=0x0,
+                         csr_address_width=14, csr_data_width=32,
+                         with_uart=False, with_timer=False
+                         )
+
+        # Klasa definiująca minimalny mostek magistrali Wishbone
+        class _WishboneBridge(Module):
+            def __init__(self, interface):
+                self.wishbone = interface
+
+        sim_wishbone = wishbone.Interface()
+
+        # Połączenie systemowej magistrali poprzez mostek
+        # do sygnałów modułu głównego
+        wb = self.platform.request('wishbone')
+        copy_layout_directions(source=sim_wishbone, target=wb)
+        self.comb += wb.connect(sim_wishbone)
+        self.add_wb_master(sim_wishbone)
+
+        # Dodanie drugiego portu do testowanej pamięci SRAM
+        # i wyprowadzenie jego sygnałów
+        sram_pins = self.platform.request('sram')
+        sram_port = self.sram.mem.get_port(write_capable=True)
+        self.specials += sram_port
+        self.comb += [
+            sram_port.adr.eq(sram_pins.adr),
+            sram_port.dat_w.eq(sram_pins.dat_w),
+            sram_pins.dat_r.eq(sram_port.dat_r),
+            sram_port.we.eq(sram_pins.we),
+        ]
+
+        # Dodanie dwukierunkowego modułu FIFO
+        # i wyprowadzenie sygnałów wejściowych i wyjściowych
+        fifo_pins = self.platform.request('fifo')
+        self.submodules.fifo = TestFIFOTransceiver(fifo_pins, 8)
+        self.add_memory_region("fifo", self.mem_map["fifo"],
+            self.bus.data_width//8, type=[]
+            )
+        self.add_wb_slave(self.mem_map["fifo"], self.fifo.bus)
+\end{minted}
+\caption{\label{lst:harness-basesoc}Fragment skryptu w języku Python generującego minimalny układ z testowanymi peryferiami oraz magistralą Wishbone}
+\end{longlisting}
 
 \subsubsection{Procedura wykonywania testów}
 Zbiór testów jest wykonywany z użyciem komendy pytest, która jest częścią biblioteki o tej samej nazwie. Według deficji testów z pliku test.py generowana jest lista testów z różnymi kombinacjami parametrów według podanych przedziałów. Dzięki temu z czterech rodzajów testów (cykl klasyczny oraz wybrany cykl potokowych dla peryferium FIFO oraz modułu SRAM) otrzymano zbiór xxx testów, które zostają wykonywane po kolei. Po zakończeniu testów program pytest zwraca ich wyniki, które można zapisać również w formacie HTML. Umożliwia to wyfiltrowanie przypadków, dla których testy nie kończą się zgodnie z oczekiwaniami.
 
-\todo[inline]{LISTING: struktura przykładowego testu}
+Poniżej zamieszczony jest przykładowy test, który wykonywuje operację odczytu dowolnej ilości słów, zaczynając od wybranego adresu. Dzięki sparametryzowaniu każdego testu możliwym jest uruchonienie tego samego testu z różnymi parametrami wejściowymi. Umożliwia to testowanie wybranych peryferiów na różne sposoby, wykorzystując między innymi wypełnienie pamięci SRAM lub wejściowej kolejki FIFO losowymi danymi w celu weryfikacji poprawności transferu danych dla różnych zbiorów danych.
+
+\begin{longlisting}
+\begin{minted}{python}
+@cocotb.test()
+async def test_read(dut):
+    # Parametry wejściowe, które mogą zostać zmodyfikowane przez skrypt:
+    # adres startowy peryferium
+    adr_base = int(os.environ.get("adr_base", "3489660928"))
+    # przesunięcie adresu, od którego zacząć test
+    adr_offset = int(os.environ.get("adr_offset", "0"))
+    # inkrementacja adresu
+    adr_inc = int(os.environ.get("adr_inc", "0"))
+    # ilość słów do odczytania
+    length = int(os.environ.get("length", "4"))
+    # ilość losowych słów do zapełnienia pamięci SRAM
+    sram_fill = int(os.environ.get("sram_fill", "0"))
+    # ilość losowych słów do zapełnienia wyjściowej kolejki FIFO
+    fifo_fill = int(os.environ.get("fifo_fill", "0"))
+
+    # Przygotowanie danych testowych
+    test_data = random.sample(range(0x80000000, 0xffffffff), length)
+    ops_read = []
+    for i in range(length):
+        ops_read.append((adr_base+adr_offset+(i*adr_inc), None))
+
+    # Przygotowanie środowiska
+    harness = WbMaster(dut)
+    clk_gen = make_clock(harness.dut, 100)
+
+    # Kroki testu
+    await harness.reset()
+    if fifo_fill:
+        await harness.fifo_write(test_data)
+    if sram_fill:
+        await harness.sram_write(adr_offset, test_data)
+    responses = await harness.wb_classic_cycle(ops_read, acktimeout=3)
+
+    clk_gen.kill()
+
+    harness.count_cycles(responses)
+
+    # Weryfikacja wyników
+    for i in range(len(responses)):
+        harness.dut._log.info("{} @ {:08x} ? {}".format(hex(responses[i].datrd), responses[i].adr, bin(test_data[i])))
+        assert responses[i].datrd == test_data[i]
+\end{minted}
+\caption{\label{lst:harness-sampletest}Fragment testu w języku Python realizującego operację odczytu wybranej ilości słów poprzez magistralę Wishbone}
+\end{longlisting}
+
 
 \subsubsection{Porównanie wyników testów}
 
@@ -48,15 +155,109 @@ Z czterech pamięci SRAM dwa są w trybie tylko do odczytu - zawierać będą pr
 
 \subsubsection{Program dla jednostki centralnej RISC-V badający szybkość operacji na pamięci}
 
-Program testowy, zaimplementowany w języku C, testuje wybrany obszar pamięci poprzez zapisanie oraz odczytanie całego obszaru. Test ten jest wykonywany na dwa sposoby: dokonując operacji na kolejnych oraz losowy adresach.
-Funkcje odpowiadające za przeprowadzenie testu są dostępne w ramach biblioteki libbase, będącej częścią frameworka LiteX - o ile funkcje można wywołać z poziomu konsoli programu rozruchowego, to program na etapie budowania zapisuje adres startowy oraz pojemność testowanej pamięci przekazany przez skrypt budujący gateware, pozwalając na automatyczne wykonanie testu w momencie załadowania bitstreamu na układ FPGA lub uruchomienia symulatora.
+Program testowy, zaimplementowany w języku C, testuje wybrany obszar pamięci poprzez zapisanie oraz odczytanie całego obszaru. Test ten jest wykonywany na dwa sposoby: dokonując operacji na kolejnych oraz losowych adresach.
+
+\begin{listing}[H]
+\begin{minted}{c}
+int main(void)
+{
+#ifdef CONFIG_CPU_HAS_INTERRUPT
+    irq_setmask(0);
+    irq_setie(1);
+#endif
+    uart_init();
+
+    printf("%s\n\n", MEM_REGIONS);
+    printf(":%x@%p\n", TEST_SIZE, (void *)TEST_ADDR);
+
+    puts(":A");
+    memtest((unsigned int *)TEST_ADDR, TEST_SIZE);
+    puts(":B");
+    memspeed((unsigned int *)TEST_ADDR, TEST_SIZE, 0, 0);
+    puts(":C");
+    memspeed((unsigned int *)TEST_ADDR, TEST_SIZE, 0, 1);
+    puts(":D");
+
+    /* Finish simulation */
+#ifdef CSR_SIM_FINISH_BASE
+    sim_finish_finish_write(1);
+#endif
+
+    return 0;
+}
+\end{minted}
+\caption{\label{lst:benchmark-main.c}Główna funkcja programu testowego służącego do pomiaru prędkości transferu danych}
+\end{listing}
+
+Funkcje odpowiadające za przeprowadzenie testu są dostępne w ramach biblioteki libbase, będącej częścią frameworka LiteX - o ile funkcje można wywołać z poziomu konsoli programu rozruchowego, to program na etapie budowania zapisuje adres startowy oraz pojemność testowanej pamięci przekazany przez skrypt budujący układ platformy testowej, pozwalając na automatyczne wykonanie testu w momencie załadowania bitstreamu na układ FPGA lub uruchomienia symulatora.
 Dodatkową funkcjonalnością, dostępną w przypadku uruchomienia testu w symulacji, jest śledzenie wykonywania poprzez możliwość zapisywania "flagi" pod określonym wcześniej adresem - zawartość tego adresu jest potem zapisywana w pliku z przebiegami sygnałów emulowanego systemu, dzięki czemu można zbadać, jakie operacje na magistrali są wykonywane w danym fragmencie testu.
 
-\todo[inline]{struktura programu, sposób kompilacji?}
+\todo[inline]{DIAGRAM: proces kompilacji}
 
 \subsubsection{Wyniki testów wydajnościowych}
 
-\todo[inline]{tabelki i wstępne spostrzeżenia}
+Testy zostały wykonane kilkukrotnie, zaś ich wyniki uśrednione w celu otrzymania lepszej powtarzalności wyników w konkretnym środowisku.
+
+Dla programu testowego uruchomionego w symulatorze Verilator na średniej klasy komputerze osobistym z symulowaną prędkością 1 MHz wyniki prezentują się następująco:
+
+\begin{center}
+
+\begin{table}[H]
+\begin{tabular}{ r|l|l|l| }
+  & prędkość bazowa & prędkość po zmianach & różnica względem prędkości bazowej\\
+ \hline
+ zapis & 1.6 MiB/s & 1.6 MiB/s & 100.0 \%\\
+ odczyt & 918.3 KiB/s & 1.1 MiB/s & 123.6 \%\\
+ \hline
+\end{tabular}
+\caption{\label{tab:benchmark-seq-sim}Wyniki pomiaru prędkości operacji sekwencyjnych na symulowanej platformie testowej}
+\end{table}
+
+\begin{table}[H]
+\begin{tabular}{ r|l|l|l| }
+  & prędkość bazowa & prędkość po zmianach & różnica względem prędkości bazowej\\
+ \hline
+ zapis & 1.6 MiB/s & 1.6 MiB/s & 100.0 \%\\
+ odczyt & 122.7 KiB/s & 154.8 KiB/s & 126.2 \%\\
+ \hline
+\end{tabular}
+\caption{\label{tab:benchmark-rnd-sim}Wyniki pomiaru prędkości operacji losowych na symulowanej platformie testowej}
+\end{table}
+
+\end{center}
+
+Ten sam program uruchomiony na platformie zrealizowanej z wykorzystaniem układu FPGA taktowanego zegarem 100 MHz natomiast pokazuje następujące rezultaty:
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{ r|l|l|l| }
+  & prędkość bazowa & prędkość po zmianach & różnica względem prędkości bazowej\\
+ \hline
+ zapis & 166.6 MiB/s & 1.6 MiB/s & 100.0 \%\\
+ odczyt & 87.2 MiB/s & 110.4 MiB/s & 126.6 \%\\
+ \hline
+\end{tabular}
+\end{center}
+\caption{\label{tab:benchmark-seq-arty}Wyniki pomiaru prędkości operacji sekwencyjnych na układzie FPGA}
+\end{table}
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{ r|l|l|l| }
+  & prędkość bazowa & prędkość po zmianach & różnica względem prędkości bazowej\\
+ \hline
+ zapis & 166.6 MiB/s & 166.7 MiB/s & 100.0 \%\\
+ odczyt & 11.6 MiB/s & 14.7 MiB/s & 126.6 \%\\
+ \hline
+\end{tabular}
+\end{center}
+\caption{\label{tab:benchmark-rnd-arty}Wyniki pomiaru prędkości operacji losowych na układzie FPGA}
+\end{table}
+
+Na podstawie wyników można zauważyć, iż prędkość odczytu z pamięci wzrosła o 23 do 26 punktów procentowych względem prędkości platformy bez obsługi transferów potokowych. Oznacza to, iż wdrożone modyfikacje przyspieszyły odczyt danych w znaczącym stopniu bez konieczności przyspieszenia taktowania całego układu.
+
+Brak zmian w prędkości zapisu można wytłumaczyć tym, iż procesor wykonywuje kilka operacji, zanim pojedyncze słowo będzie gotowe do zapisania w pamięci - tym samym transfery potokowe nie zachodzą, gdyż nie jest możliwym przygotowanie nowych słów w każdym kolejnym takcie zegara.
+Podobnie można wytłumaczyć również zmianę w prędkości odczytu - procesor w jednym cyklu potokowym odczytuje tyle słów, ile można zmieścić w pojedynczej linii pamięci podręcznej - dzięki temu procesor szybciej może pobrać dane z kilku sąsiadujących adresów. Przy bardziej odległych od siebie adresach procesor musi jednak ponownie pobrać dane bezpośrednio z pamięci RAM, gdyż nie zostały one załadowane do pamięci podręcznej przy poprzedniej operacji odczytu potokowego.
 
 %\subsection{CFU Plauground - w razie jakby nie udało się wycisnąć mininalnej ilości tekstu}
 

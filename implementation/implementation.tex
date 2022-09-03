@@ -17,19 +17,28 @@ Szerokość szyn danych zależy od wielkości słowa, jakie mają być przesyła
 \subsection{Rodzaje cykli na szynie Wishbone}
 
 \subsubsection{Wishbone Classic Bus Cycles}
-Podstawowy rodzaj cykli na magistrali Wishbone opisany w specyfikacji.
+Podstawowy rodzaj cykli na magistrali Wishbone obsługuje operacje odczytu lub zapisu pojedynczego słowa szyny w trakcie pojedynczego cyklu transferu.
 
-\todo[inline]{opis klasycznych cykli}
+Cykl rozpoczyna się poprzez asercję sygnału $CYC$ przez inicjatora cyklu, a kończy poprzez jego negację. Sygnał $STB$ zaś informuje o gotowości do transferu słowa i jest utrzymywany w stanie wysokim, dopóki jeden z sygnałów terminujących cykl ($ACK$, $ERR$, $RTY$) nie zostanie zasertowany przez drugą stronę połączenia. Pozwala to na na regulację prędkości transferu przez obie strony połączenia.
 
-W celu ograniczenia opóźnień przy transferze słów między kontrolerem a peryferium wykorzystuje się synchroniczne sygnały terminujące cykl. Wprowadza to jednak dodatkowe opóźnienie przy każdym słowie, gdyż peryferium nie jest świadome tego, że jest ponownie adresowane przy każdym kolejnym słowie - z tego powodu po odebraniu lub wystawieniu słowa peryferium neguje sygnał ACK w kolejnym takcie zegara. Oznacza to, że transfer każdego słowa w cyklu przypadają dwa takty zegara, zakładając, że peryferium nie potrzebuje dodatkowych opóźnień z innych powodów.
+\todo[inline]{DIAGRAM: przebieg odczytu pojedynczego słowa na magistrali}
+
+W celu transferu słowa wykorzystywane są przynajmniej następujące sygnały: linia adresowa ($ADR$), linia danych ($DAT_I$, $DAT_O$), linia wyboru fragmentu słowa ($SEL$) oraz sygnał kierunku operacji ($WE$). Strona inicjująca połączenie na początku cyklu wystawia adres, na którym ma być wykonywana operacja; słowo na szynie $DAT_O$, jeśli jest to operacja zapisu; linie wybierające, które części szyny danych będą wykorzystywane w transferze oraz kierunek operacji. W następnym takcie zegara druga strona może wystawić słowo na szynie wejściowej danych ($DAT_I$), jesli jest to operacja zapisu, oraz zasercjować jeden z sygnałów synchronizujących - $ACK$, który potwierdza realizację operacji; $ERR$, informujący o wystąpieniu błędu w trakcie transferu; oraz $RTY$, który informuje o chwilowej braku gotowości strony odbiorczej do obsługi transferu.
+
+\todo[inline]{DIAGRAM: przebieg zapisu pojedynczego słowa na magistrali}
+
+W celu ograniczenia opóźnień przy transferze słów między kontrolerem a peryferium wykorzystuje się synchroniczne sygnały terminujące cykl. Wprowadza to jednak dodatkowe opóźnienie przy każdym słowie, gdyż peryferium nie jest świadome tego, że jest ponownie adresowane przy każdym kolejnym słowie - z tego powodu po odebraniu lub wystawieniu słowa peryferium kończy cykl poprzez negację sygnału $ACK$. Oznacza to, że transfer każdego słowa w cyklu przypadają dwa takty zegara, zakładając, że peryferium nie potrzebuje dodatkowych opóźnień z innych powodów.
 
 \subsubsection{Wishbone Registered Feedback Bus Cycles}
 
 Rozwiązaniem problemu cykli opóźniających przy transferze każdego kolejnego słowa jest rozbudowa magistrali o dodatkowe sygnały sterujące, które pozwoliłyby na informowanie peryferiów, że w danym cyklu magistrali nastąpi transfer większej ilości słów. Dzięki temu peryferium może się przygotować do odebrania większej ilości danych bez konieczności potwierdzania odbioru po każdym słowie.
 
-Ten rodzaj zaawansowanego rodzaju sychronicznego terminowania cykli jest opisany w części specyfikacji "Wishbone Registered Feedback Bus Cycles". Dodaje ona dwa sygnały do magistrali, które są wykorzystywane do przenoszenia rodzaju cyklu oraz związanej z nim dodatkowej informacji.
+\todo[inline]{DIAGRAM: uproszczony przebieg potokowego transferu danych}
+
+Ten rodzaj sychronicznego terminowania cykli jest opisany w części specyfikacji "Wishbone Registered Feedback Bus Cycles". Dodaje ona dwa sygnały do magistrali, które są wykorzystywane do przekazywania informacji o rodzaju cyklu oraz związanego z nim dodatkowego parametru.
 
 Sygnał CTI (Cycle Type Identifier) służy do identyfikowania rodzaju obecnie wykonywanego cyklu. Peryferium może wykorzystać tą informację, by przygotować się na kolejne części cyklu.
+\begin{table}
 \begin{center}
 \begin{tabular}{ r|l }
  CTI[2:0] & opis \\ 
@@ -45,10 +54,13 @@ Sygnał CTI (Cycle Type Identifier) służy do identyfikowania rodzaju obecnie w
  \hline
 \end{tabular}
 \end{center}
+\caption{\label{tab:signal-states-cti}Rodzaje stanów sygnału CTI}
+\end{table}
 
-Sygnał BTI (Burst Type Extension) zawiera zaś dodatkowe informacje zależne od danego rodzaju aktualnego cyklu.
-Dla cyklu potokowego z inkrementacją adresu jego wartość można interpretować w następujący sposób:
+Sygnał BTE (Burst Type Extension) zawiera zaś dodatkowe informacje zależne od danego rodzaju aktualnego cyklu.
+W obecnej wersji specyfikacji jest wykorzystywany tylko w cyklu potokowym z inkrementacją adresu; jego wartość dla tego rodzaju cyklu można interpretować w następujący sposób:
 
+\begin{table}
 \begin{center}
 \begin{tabular}{ r|l }
  BTE[1:0] & opis \\ 
@@ -60,18 +72,21 @@ Dla cyklu potokowego z inkrementacją adresu jego wartość można interpretowa�
  \hline
 \end{tabular}
 \end{center}
+\caption{\label{tab:signal-states-bte}Rodzaje stanów sygnału BTE dla CTI równego 0b010}
+\end{table}
 
-Cykle potokowe inkrementujące adres z zawijaniem są zwykle wykorzystywane przy wypełnianiu linii pamięci podręcznej (cache) procesora, zaś cykle potokowe ze stałym adresem przydatne są przy strumieniowaniu danych do konkretnego peryferium (na przykład przetwornika cyfrowo-analogowego) pod kontrolą dedykowanego podzespołu do szybkich transferów danych (np. kontroler Direct Memory Access).
+Cykle potokowe z zawijającą inkrementacją adresu są zwykle wykorzystywane przy wypełnianiu linii pamięci podręcznej (cache) procesora; pozwala to na pełne pokrycie linii pamięci podręcznej, gdy adres, od którego zaczyna się dany cykl potokowy, nie pokrywa się z szerokością linii pamięci cache (która mieści kilka słów transferowych, przez co adresowana jest z pominięciem kilku najmniej znaczących bitów adresu)
+Cykle potokowe ze stałym adresem przydatne są zaś przy strumieniowaniu danych do konkretnego adresu pojedynczego peryferium (na przykład przetwornika cyfrowo-analogowego) poprzez wykorzystanie dedykowanego podzespołu do szybkich transferów danych, zwanych również z angielskiego Direct Memory Access.
 
 \subsection{Implementacja podzespołu z obsługą cykli transmisji seryjnej do stałego adresu}
 
 W celu zaznajomienia się z projektowaniem peryferiów komunikujących się poprzez interfejs Wishbone, pierwszym projektem było stworzenie minimalnego peryferium, które oprócz interfejsu Wishbone ma również wyprowadzenia, które można wykorzystać w celu komunikacji z podzespołem drogą inną niż poprzez magistralę Wishbone. Pozwoliłoby to na weryfikację poprawności działania komunikacji poprzez porównywanie danych, które zostały zapisane lub odebrane z kontrolera poprzez magistralę z tymi, które można odebrać lub nadać do peryferium inną drogą.
 
-\todo[inline]{schemat blokowy fifo_transceiver.py}
+\todo[inline]{DIAGRAM: schemat blokowy fifo_transceiver.py}
 
 Peryferium składa się z dwóch synchronicznych kolejek FIFO oraz logiki obsługującej magistralę Wishbone. Jedna kolejka FIFO służy do odbioru danych z zewnętrznego źródła, druga zaś odbiera dane z zewnętrznego źródła. Obie kolejki zostały podłączone do magistrali Wishbone z użyciem logiki zawierającej maszynę stanów skończonych, która zajmuje się sterowaniem sygnałami synchronizacji portów wewnętrznych kolejek w zależności od rodzaju operacji na magistrali (odczyt lub zapis). Zewnętrzne porty kolejek zostały wyprowadzone na zewnątrz peryferium bez dodatkowej logiki sterującej w celu ułatwienia przeprowadzenia testów na dalszych etapach pracy. Kolejki są dostępne jako gotowy element w module $migen.genlib$ będącej częścią biblioteki do opisu logiki Migen.
 
-\todo[inline]{schemat maszyny stanowej bez burstów}
+\todo[inline]{DIAGRAM: schemat maszyny stanowej bez burstów}
 
 Maszyna stanowa składa się z trzech stanów: $IDLE$, $READ$ oraz $WRITE$.
 Stanem startowym jest $IDLE$. Gdy zostanie zainicjowany cykl transferu danych na magistrali poprzez zasertowanie sygnałów CYC oraz STB, maszyna w kolejnym takcie zegara przejdzie do stanu $READ$ lub $WRITE$, w zależności od stanu sygnału WE na magistrali.
@@ -80,17 +95,17 @@ Podobnie funkcjonuje to przy stanie $READ$ maszyny, jednak w tym wypadku potwier
 
 Z reguły 4.35 opisanej w specyfikacji interconnectu Wishbone wynika fakt, że w trakcie trwania cyklu potokowego ze stałym adresem nie mogą zmienić się następujące sygnały magistrali: linia adresowa, linia wybierająca $SEL$ oraz wybór operacji $WE$. Wobec tego można założyć, że cykl rozpoczęty operacją zapisu będzie w kolejnych taktach zegara przekazywał kolejne słowa do odebrania przez podzespół.
 
-\todo[inline]{schemat maszyny stanowej z podkreślonymi akcjami przy CTI == 0b001}
+\todo[inline]{DIAGRAM: schemat maszyny stanowej z podkreślonymi akcjami przy CTI == 0b001}
 
-W celu kontynuowania cyklu przy każdym takcie zegara sprawdzane są następujące warunki: czy cykl dalej jest aktywny (sygnały $CYC$ i $STB$ są aktywne) oraz czy sygnał przekazujący rodzaj cyklu $CTI$ ma wartość $0b001$, który oznacza cykl potokowy ze stałym adresem. Jeśli oba te warunki są spełnione, zaś maszyna stanowa sterująca sygnałami sterującymi kolejek oraz interfejsu magistrali, to ponawiamy obecny stan maszyny w następnym takcie zegara. Dzięki temu w każdym takcie zegara kolejne słowa zostaną odebrane z kolejki odbiorczej albo dodane do kolejki nadawczej w podzespole, bez inicjalizowania cyklu magistrali na nowo.
+W celu kontynuowania cyklu przy każdym takcie zegara sprawdzane są następujące warunki: czy cykl dalej jest aktywny (sygnały $CYC$ i $STB$ są aktywne) oraz czy sygnał przekazujący rodzaj cyklu $CTI$ ma dalej wartość $0b001$, oznaczający cykl potokowy ze stałym adresem. Jeśli oba te warunki są spełnione, to ponawiamy obecny stan maszyny stanów w następnym takcie zegara, podtrzymując sygnał ACK w stanie wysokim. Dzięki temu w każdym takcie zegara kolejne słowa zostaną odebrane z kolejki odbiorczej albo dodane do kolejki nadawczej w podzespole, bez inicjalizowania cyklu magistrali na nowo.
 
-\todo[inline]{przebiegi prezentujące różnicę (albo to dopiero przy testowaniu pokazać)}
+\todo[inline]{DIAGRAM: przebiegi prezentujące różnicę (albo to dopiero przy testowaniu pokazać)}
 
 \subsection{Rozbudowanie istniejącego podzespołu (SRAM) o obsługę cykli transmisji seryjnej z inkrementacją adresu}
 
 Peryferium SRAM, będący częścią biblioteki rdzeni w frameworku LiteX, składa się z dwóch części: synchronicznej pamięci (z biblioteki Migen) o zdefiniowanej szerokości słowa i pojemności (liczonej w słowach) oraz z interfejsu Wishbone, który łączy wspomnianą pamięć z magistralą.
 
-\todo[inline]{soc/interconnect/wishbone.WishboneSRAM - schemat budowy}
+\todo[inline]{DIAGRAM: soc/interconnect/wishbone.WishboneSRAM - schemat budowy}
 
 Interfejs implementuje wyłącznie podstawowy rodzaj cykli - jako, że wybrany procesor obsługuje potokowe transfery danych, będziemy w stanie, po rozbudowaniu implementacji interfejsu w module SRAM, zweryfikować wpływ obsługi transferów potokowych na praktyczną wydajność systemu mikroprocesorowego.
 
@@ -105,17 +120,133 @@ Strona inicjująca połączenie informuje o rodzaju cyklu poprzez sygnał CTI. J
 Z dwóch zdefiniowanych w specyfikacji rodzajów cykli potokowych, ze stałym adresem oraz inkrementacją adresu, w przypadku pamięci RAM interesuje nas cykl potokowy z inkrementacją adresu. W tym celu wykorzystamy warunek kombinacyjny, który w wypadku wystąpienia wspieranego rodzaju cyklu asertuje sygnał informujący o żądaniu transferu potokowego.
 Oprócz tego definiujemy wektor adr_counter_base, w którym będzie zawarty adres bazowy z wyłączeniem bitów, które będą wykorzystywane w przypadku inkrementacji adresu z zapętleniem najmniej znaczących bitów.
 
+\begin{listing}[H]
+\begin{minted}{python}
+class SRAM(Module):
+    def __init__(self, mem_or_size, read_only=None, init=None, bus=None, burst=True):
+            # ...
+            adr_burst = Signal()
+
+            # Obsługiwane są tylko cykle z inkrementacją adresu
+            self.comb += [
+                Case(self.bus.cti, {
+                    # cykl z inkrementacją adresu
+                    0b010: adr_burst.eq(1),
+                    # zakończenie cyklu
+                    0b111: adr_burst.eq(0),
+                    # pozostałe rodzaje cykli (w tym cykl standardowy)
+                    "default": adr_burst.eq(0)
+                }),
+            ]
+\end{minted}
+\caption{\label{lst:impl-sram-detect}Logika kombinacyjna generująca sygnał informujący o cyklu potokowym na podstawie sygnału CTI}
+\end{listing}
+
 \subsubsection{Generator sekwencji adresów}
 
 Gdy cykl zostanie rozpoczęty poprzez zasertowanie sygnałów CYC i STB oraz inicjator połączenia zażąda transferu potokowego, inicjalizowany jest licznik adresów. Jest on wykorzystywany do generowania kolejnych adresów, do których dostęp strona inicjalizująca połączenie chce mieć dostęp w kolejnych taktach zegara bez oczekiwania na podanie kolejnych adresów. Gdy adres został zapisany w liczniku, w kolejnych taktach zegara licznik będzie inkrementowany o 1.
-Jednocześnie w dodatkowym rejestrze, nazwanym `adr_counter_offset' zapisywane są dolne bity pierwszego zażądanego adresu. Zawartość tego dodatkowego rejestru będzie wykorzystywana do wyliczenia dolnych bitów dolnego adresu, jeśli inkrementacja adresu ma następywać z zawijaniem dolnych bitów.
+Jednocześnie w dodatkowym rejestrze, nazwanym $adr_counter_offset$ zapisywane są dolne bity pierwszego zażądanego adresu. Zawartość tego dodatkowego rejestru będzie wykorzystywana do wyliczenia dolnych bitów dolnego adresu, jeśli inkrementacja adresu ma następywać z zawijaniem dolnych bitów.
+
+\begin{longlisting}
+\begin{minted}{python}
+class SRAM(Module):
+    def __init__(self, mem_or_size, read_only=None, init=None, bus=None, burst=True):
+        # ...
+        adr_wrap_mask = Array((0b0000, 0b0011, 0b0111, 0b1111))
+        adr_wrap_max = adr_wrap_mask[-1].bit_length()
+
+        adr_latched = Signal()
+
+        adr_counter = Signal(len(self.bus.adr))
+        adr_counter_offset = Signal(adr_wrap_max)
+
+        # Zapisanie adresu startowego nowego cyklu
+        self.sync += [
+            If(self.bus.cyc & self.bus.stb & adr_burst,
+                adr_latched.eq(1),
+                # Jeśli adres został zapisany, inkrementuj go w każdym takcie zegara
+                If(adr_latched,
+                    adr_counter.eq(adr_counter + 1)
+                ).Else(
+                    # Zapisz najmniej znaczące bity adresu w wypadku cyklu
+                    # z zawijaniem adresu
+                    adr_counter_offset.eq(self.bus.adr & adr_wrap_mask[self.bus.bte]),
+                    # Zapisz adres bez najmniej znaczących bitów,
+                    # jeśli trwa cykl z zawijaniem adresu. Jeśli będzie to operacja odczytu,
+                    # licznik będzie preinkrementowany o 1
+                    If(self.bus.we,
+                        adr_counter.eq(
+                            Cat(self.bus.adr & ~adr_wrap_mask[self.bus.bte],
+                                self.bus.adr[adr_wrap_max:]
+                                )
+                        ),
+                    ).Else(
+                        adr_counter.eq(
+                            Cat(self.bus.adr & ~adr_wrap_mask[self.bus.bte],
+                                self.bus.adr[adr_wrap_max:]
+                                ) + 1
+                        ),
+                    )
+                ),
+                If(self.bus.cti == 0b111,
+                    adr_latched.eq(0),
+                    adr_counter.eq(0),
+                    adr_counter_offset.eq(0)
+                )
+            # Zerowanie licznika po zakończeniu cyklu
+            ).Else(
+                adr_latched.eq(0),
+                adr_counter.eq(0),
+                adr_counter_offset.eq(0)
+            ),
+        ]
+\end{minted}
+\caption{\label{lst:impl-sram-adrcounter}Fragment logiki synchronicznej odpowiedzialnej za kontrolę licznika adresu}
+\end{longlisting}
 
 Gdy inicjator cyklu informuje o zakończeniu transferu potokowego poprzez ustawienie odpowiedniej wartości na sygnale CTI, licznik jest zerowany i zatrzymywany, by przy kolejnych taktach zegara nie wykonywać nadmiarowych operacji w pamięci.
 
-W części kombinacyjnej generatora następny adres jest wyznaczany poprzez zsumowanie dwóch sygnałów, gdzie jeden sygnał zawiera wartość licznika bez zawijanych bitów adresu, zaś drugi sygnał zawiera dolne bity adresu wyznaczone poprzez zsumowanie zawartości licznika i rejestru zawierającego dolne bity adresu początkowego, z których wykorzystywane są wyłącznie zawinięte bity.
+W części kombinacyjnej generatora następny adres jest wyznaczany poprzez zsumowanie dwóch sygnałów, gdzie jeden sygnał zawiera wartość licznika bez zawijanych bitów adresu, zaś drugi sygnał zawiera dolne bity adresu wyznaczone poprzez zsumowanie zawartości licznika i rejestru zawierającego dolne bity adresu początkowego, z których wykorzystywane są wyłącznie zawinięte bity.przebieg zapisu pojedynczego słowa na magistrali
+
+\begin{listing}[H]
+\begin{minted}{python}
+class SRAM(Module):
+    def __init__(self, mem_or_size, read_only=None, init=None, bus=None, burst=True):
+        # ...
+        adr_offset_lsb = Signal(adr_wrap_max)
+        adr_offset_msb = Signal(len(self.bus.adr))
+        adr_next = Signal(len(self.bus.adr))
+
+        # Wyznacz kolejny adres poprzez zsumowanie zawartości licznika
+        # z przesunięciem wyznaczonym przez najmniej znaczące bity adresu startowego
+        self.comb += [
+            adr_offset_lsb.eq((adr_counter + adr_counter_offset) & adr_wrap_mask[self.bus.bte]),
+            adr_offset_msb.eq(adr_counter & ~adr_wrap_mask[self.bus.bte]),
+            adr_next.eq(adr_offset_msb + adr_offset_lsb)
+        ]
+\end{minted}
+\caption{\label{lst:impl-sram-adrnext}Logika kombinacyjna odpowiedzialna za sumowanie docelowego adresu w każdym cyklu zegara}
+\end{listing}
 
 Wyznaczany adres, jeśli licznik jest uruchomiony, jest przekazywany w logice kombinacyjnej do linii adresowej modułu pamięci RAM - w przeciwnym wypadku adres do pamięci RAM jest przekazywany bezpośrednio z magistrali, wliczając pierwszy adres przy transferach potokowych.
 
 \subsubsection{Generowanie sygnału potwierdzenia}
 
 Logika synchroniczna odpowiedzialna za generowanie sygnału ACK została zmodyfikowana w nieznaczny sposób, poprzez dodanie warunku OR dla znegowanego sygnału ACK z poprzedniego taktu oraz wewnętrznego sygnału informującego o aktywnym transferze potokowym. W ten sposób sygnał ACK jest aktywny w każdym takcie zegara przy transferach potokowych, zaś przy klasycznych cyklach zachowanie jest to samo co poprzednio, czyli sygnał ACK jest natychmiastowo negowany w drugim takcie zegara po rozpoczęciu transferu.
+
+\begin{listing}[H]
+\begin{minted}{python}
+class SRAM(Module):
+    def __init__(self, mem_or_size, read_only=None, init=None, bus=None, burst=True):
+        # ...
+        self.sync += [
+            self.bus.ack.eq(0),
+            If(self.bus.cyc & self.bus.stb & (~self.bus.ack | adr_burst),
+                self.bus.ack.eq(1)
+            )
+        ]
+\end{minted}
+\caption{\label{lst:impl-sram-adrnext}Fragment logiki synchronicznej generującej sygnał ACK}
+\end{listing}
+
+W celu uproszczenia kodu sygnał $adr_burst$ jest zawsze generowany w układzie, nawet jesli obsługa transferów potokowych zostanie wyłączana - w tym wypadku sygnał ten ma zawsze wartość $0$; sygnał ten może zostać automatycznie usunięty w trakcie optymalizacji układu przez programy do syntezy logiki.

@@ -18,6 +18,8 @@ Przykładami popularnych obecnie komputerów jednopłytkowych, zbudowanych z uż
 	\item Orange Pi (Shenzhen Xunlong Software Co., Ltd.)
 \end{itemize}
 
+\todo[inline]{ZDJĘCIE: popularny komputer jednopłytkowy}
+
 \subsection{Definicja układu System on Chip w porównaniu z mikrokontrolerem}
 
 Układy typu System on Chip to układy, które na jednym podłożu półprzewodnikowym integrują wszystkie komponenty składające się na kompletny system mikroprocesorowy. Dzięki wysokiemu stopniu integracji układy te pozwoliły na znaczną miniaturyzację urządzeń elektronicznych bazujących na systemach mikroprocesorowych, takich jak telefony komórkowe czy komputery przenośne, oraz na ograniczenie kosztów przy większej skali produkcji.
@@ -43,7 +45,7 @@ Wśród dostępnych opcji konfiguracyjnych są takie elementy jak:
 	\item opcjonalna jednostka zarządzania pamięcią (MMU)
 \end{itemize}
 
-Na potrzeby tego projektu używa zostanie podstawowa konfiguracja, nie zawierająca dodatkowych rozkazów, ze względu na ograniczone zasoby układu FPGA, na którym realizowane będą testy wydajnościowe; oprócz tego dodana zostanie pamięć podręczna danych, która odpowiedzialna będzie za buforowanie odczytywanych danych.
+Na potrzeby tego projektu używa zostanie podstawowa konfiguracja, nie zawierająca dodatkowych rozkazów, ze względu na ograniczone zasoby układu FPGA, na którym realizowane będą testy wydajnościowe. Oprócz tego dodana zostanie pamięć podręczna danych, która odpowiedzialna będzie za buforowanie odczytywanych danych.
 
 \subsection{Przegląd dostępnych magistrali systemowych}
 
@@ -51,20 +53,20 @@ Magistrale, jak zostało wspomniane w poprzednich podrozdziałach, służą do t
 
 W celu wykorzystania danej szyny, wszystkie komponenty muszą mieć zaimplementowany interfejs, który pozwala na podłączenie się do danej magistrali. Jeśli któreś komponenty implementują interfejs innego mostka niż pozostałe, to można wykorzystać mostki, które pozwalają na konwersję między danymi standardami magistral.
 
-Istnieją różne standardy magistrali przeznaczone dla układów SoC, z czego bardziej znanymi są:
+Istnieją różne standardy magistrali przeznaczone dla układów SoC, wśród których bardziej znanymi standardami są:
 \begin{itemize}
 	\item AMBA AXI od Arm Ltd.,
 	\item Avalon autorstwa firmy Altera (obecnie Intel),
 	\item Wishbone od Silicore Corporation (obecnie specyfikacja pod opieką Free and Open Source Silicon Foundation)
 \end{itemize}
 
-\todo[inline]{Coś więcej o magistralach}
+Każda z tych specyfikacji ma swoje unikalne cechy: przykładowo AMBA AXI definiuje niezależne kanały do odczytu i zapisu danych, pozwalając na jednoczesne wykonywanie tych dwóch operacji. Wishbone zaś definiuje wyłącznie sposób przekazywania danych między dwiema modułami, pomijając między innymi kwestię topologii połączeń między elementami.
 
-W ramach tej pracy wykorzystywana będzie magistrala Wishbone ze względu na w pełni dostępną publicznie, wolną od tantiemów specyfikację.
+W ramach tej pracy wykorzystywana będzie magistrala Wishbone ze względu na w pełni dostępną publicznie, wolną od tantiemów specyfikację oraz jej neutralność (nie została stworzona przez dużego producenta mikroprocesorów czy układów FPGA).
 
-\subsection{Topologie połączeń}
+%\subsection{Topologie połączeń}
 
-\todo[inline]{Rodzaje topologii magistral}
+%\todo[inline]{Rodzaje topologii magistral}
 
 \subsection{Wnioski}
 

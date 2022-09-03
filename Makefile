@@ -1,5 +1,5 @@
 NAME=215514_rafal_kolucki_inz
-LATEXMK=latexmk -xelatex
+LATEXMK=latexmk -xelatex -latexoption="-shell-escape"
 
 .PHONY: all
 
