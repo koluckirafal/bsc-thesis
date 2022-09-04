@@ -250,3 +250,8 @@ class SRAM(Module):
 \end{listing}
 
 W celu uproszczenia kodu sygnał $adr_burst$ jest zawsze generowany w układzie, nawet jesli obsługa transferów potokowych zostanie wyłączana - w tym wypadku sygnał ten ma zawsze wartość $0$; sygnał ten może zostać automatycznie usunięty w trakcie optymalizacji układu przez programy do syntezy logiki.
+
+\subsection{Wnioski po optymalizacji wybranego peryferium}
+
+Dzięki prostocie implementacji interfejsu magistrali w module pamięci SRAM jak i samego modułu wprowadzenie obsługi transferów potokowych nie wymagało większych zmian w logice interfejsu - całość została sprowadzona do zaimplementowania licznika adresu po stronie modułu oraz dodatkowych warunków w logice synchronizującej komunikację po magistrali Wishbone.
+\todo[inline]{Co jeszcze można dodać?}

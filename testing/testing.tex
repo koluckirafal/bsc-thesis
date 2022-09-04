@@ -262,3 +262,7 @@ Podobnie można wytłumaczyć również zmianę w prędkości odczytu - procesor
 %\subsection{CFU Plauground - w razie jakby nie udało się wycisnąć mininalnej ilości tekstu}
 
 \subsection{Wnioski po realizacji testów}
+
+Testy napisane na potrzeby tego projektu pozwoliły na pokrycie każdego rodzaju cyklu transferu danych na magistrali, co pozwoliło na zweryfikowane poprawności implementacji transferów potokowych. Parametryzacja testów pozwoliła zaś na weryfikację, czy dla różnych kombinacji warunków początkowych cyklu mechanizm działał poprawnie, ułatwiając wyszukiwanie błędów ujawniających się tylko przy określonych kombinacjach parametrów. Ułatwiło to zwłaszcza testowanie cyklów potokowych z zawijającą inkrementacją adresów, gdzie zachowanie licznika różniło się w zależności od wybranego rozmiaru zawinięcia oraz najmniej znaczących bitów adresu, od którego rozpoczął się cykl transferu.
+
+Wyniki osiągnięte programem mierzącym prędkość transferu danych uruchomionym na testowym systemie jednoukładowym zademonstrowały średni wzrost wydajności o co najmniej 23 procent. Jest to zadowalający wynik względem wysiłku włożonego w zaimplementowanie wsparcia transferów potokowowych w module pamięci SRAM bez wprowadzania optymalizacji w innych fragmentach systemu czy oprogramowania testowego.

@@ -18,3 +18,4 @@ clean:
 	latexmk -c
 	-rm $(NAME).pdf */*.aux $(NAME).bbl $(NAME).pre $(NAME).xdv
 	-rm $(NAME).synctex.gz
+	-rm -r _minted*
