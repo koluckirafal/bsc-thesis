@@ -1,8 +1,8 @@
-\section{Realizacja oraz testowanie optymalizacji wybranej magistrali systemowej}
+\section{Realizacja optymalizacji wybranej magistrali systemowej}
 Ze względu na to, jak ważną rolę pełnią magistrale w systemie mikrokomputerowym, w tym rozdziale zostanie przeanalizowana specyfikacja magistrali Wishbone oraz jej implementacja w frameworku LiteX. Celem jest znalezienie części specyfikacji, które nie zostały zaimplementowane w LiteX, a które mogłyby przyspieszyć działanie systemu zbudowanego z jego wykorzystaniem.
 
 \subsection{Budowa magistrali Wishbone}
-Specyfikacja magistrali Wishbone definiuje wiele sygnałów, z których w praktyce wykorzystuje się wyłącznie część z nich. W podstawowych zastosowaniach wykorzystywane są następujące sygnały, opisywane z perspektywy inicjatora (mastera):
+Specyfikacja magistrali Wishbone definiuje wiele sygnałów, z których w praktyce wykorzystuje się wyłącznie część. W podstawowych zastosowaniach wykorzystywane są następujące sygnały, opisywane z perspektywy inicjatora (mastera):
 \begin{itemize}
     \item sygnały zegarowe i resetujące CLK oraz RST,
     \item szyna adresowa ADR_O,

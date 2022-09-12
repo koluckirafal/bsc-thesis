@@ -11,7 +11,7 @@ Ze względu na to, iż obserwujemy wyłącznie stan zewnętrzny, do pamięci Blo
 \subsubsection{Implementacja testów jednostkowych dla peryferiów}
 
 Testy zostały zrealizowane z użyciem języka Python, wykorzystując bibliotekę Cocotb, która umożliwia tworzenie środowiska testowego z użyciem składni języka Python zamiast w Verilogu. Pozwala to na integrację z bibliotekami ekosystemu języka Python, ułatwiając takie sprawy jak generowanie testowego zbioru danych.
-Oprócz tego wykorzystane zostały biblioteki cocotb-test oraz cocotbext-wishbone. Cocotb-test integruje Cocotb z systemem testów automatycznych pytest, dzięki czemu napisane testy można uruchamiać z różnymi ustawieniami, co w połączeniu z parametryzacją samych testów umożliwia pokrycie różnych sposobów komunikacji z testowanym podzespołem na magistrali. Cocotbext-wishbone zaś implementuje funkcje do sterowania i monitorowania sygnałów na magistrali Wishbone, co pozwala zaoszczędzić czas poprzez wywoływanie gotowych funkcji realizujących operacje na magistrali zamiast poprzez ręczne sterowanie szyną.
+Oprócz tego wykorzystane zostały biblioteki cocotb-test\cite{cocotb-test} oraz cocotbext-wishbone. Cocotb-test integruje Cocotb z systemem testów automatycznych pytest\cite{pytest6.2}, dzięki czemu napisane testy można uruchamiać z różnymi ustawieniami, co w połączeniu z parametryzacją samych testów umożliwia pokrycie różnych sposobów komunikacji z testowanym podzespołem na magistrali. Cocotbext-wishbone zaś implementuje funkcje do sterowania i monitorowania sygnałów na magistrali Wishbone, co pozwala zaoszczędzić czas poprzez wywoływanie gotowych funkcji realizujących operacje na magistrali zamiast poprzez ręczne sterowanie szyną.
 
 \todo[inline]{DIAGRAM: pipeline testów}
 
@@ -78,7 +78,7 @@ class BaseSoC(SoCCore):
 \end{longlisting}
 
 \subsubsection{Procedura wykonywania testów}
-Zbiór testów jest wykonywany z użyciem komendy pytest, która jest częścią biblioteki o tej samej nazwie. Według deficji testów z pliku test.py generowana jest lista testów z różnymi kombinacjami parametrów według podanych przedziałów. Dzięki temu z czterech rodzajów testów (cykl klasyczny oraz wybrany cykl potokowych dla peryferium FIFO oraz modułu SRAM) otrzymano zbiór xxx testów, które zostają wykonywane po kolei. Po zakończeniu testów program pytest zwraca ich wyniki, które można zapisać również w formacie HTML. Umożliwia to wyfiltrowanie przypadków, dla których testy nie kończą się zgodnie z oczekiwaniami.
+Zbiór testów jest wykonywany z użyciem komendy pytest, która jest częścią biblioteki o tej samej nazwie. Według definicji testów z pliku test.py generowana jest lista testów z różnymi kombinacjami parametrów według podanych przedziałów, przykładowo rozmiaru testowanego obszaru pamięci oraz przesunięcia pierwszego używanego adresu. Dzięki temu z czterech rodzajów testów (cykl klasyczny oraz wybrany cykl potokowych dla peryferium FIFO oraz modułu SRAM) otrzymano zbiór 116 testów, które zostają wykonywane po kolei. Po zakończeniu testów program pytest zwraca ich wyniki, które można zapisać również w formacie HTML. Umożliwia to wyfiltrowanie przypadków, dla których testy nie kończą się zgodnie z oczekiwaniami.
 
 Poniżej zamieszczony jest przykładowy test, który wykonywuje operację odczytu dowolnej ilości słów, zaczynając od wybranego adresu. Dzięki sparametryzowaniu każdego testu możliwym jest uruchonienie tego samego testu z różnymi parametrami wejściowymi. Umożliwia to testowanie wybranych peryferiów na różne sposoby, wykorzystując między innymi wypełnienie pamięci SRAM lub wejściowej kolejki FIFO losowymi danymi w celu weryfikacji poprawności transferu danych dla różnych zbiorów danych.
 
@@ -141,14 +141,14 @@ Po zweryfikowaniu poprawności działania peryferiów kolejnym etapem jest przep
 
 \subsubsection{Wykorzystane urządzenia}
 
-Testy wydajnościowe były wykonywane w dwóch środowiskach: na zestawie deweloperskim Digilent Arty A7-35, zawierającym układ programowalnych bramek logicznych Artix-7 firmy Xilinx, oraz na symulatorze uruchomionym na średniej klasy komputerze klasy PC będącym pod kontrolą systemu operacyjnego Debian GNU/Linux. Symulator został automatycznie zbudowany poprzez framework LiteX z użyciem programu Verilator, zaś plik konfigurujący zachowanie układu FPGA (zwany bitstreamem) zbudowany został z wykorzystaniem zbioru narzędzi do syntezy Vivado firmy Xilinx.
+Testy wydajnościowe były wykonywane w dwóch środowiskach: na zestawie deweloperskim Digilent Arty A7-35\cite{digilent-arty-a7}, zawierającym układ programowalnych bramek logicznych Artix-7 firmy Xilinx, oraz na symulatorze uruchomionym na średniej klasy komputerze klasy PC będącym pod kontrolą systemu operacyjnego Debian GNU/Linux\cite{debian11}. Symulator został automatycznie zbudowany poprzez framework LiteX z użyciem programu Verilator, zaś plik konfigurujący zachowanie układu FPGA (zwany bitstreamem) zbudowany został z wykorzystaniem zbioru narzędzi do syntezy Vivado\cite{vivado2019.1} firmy Xilinx oraz, na potrzeby testowania kompatybilności, zestawu narzędzi F4PGA\cite{f4pga}.
 
 \todo[inline]{RYSUNEK: zdjęcie arty-a7, output z symulatora lub inne jego przedstawienie}
 
 \subsubsection{Testowy układ SoC i jego architektura}
 
 Testowy system mikroprocesorowy składa się z procesora VexRiscv, czterech bloków pamięci SRAM, interfejsu UART do komunikacji między programem testowym a użytkownikiem oraz niewykorzystanych bloków interfejsu Ethernet i analizatora stanów logicznych.
-Procesor VexRiscv został skonfigurowany z pamięcią podręczną danych wielkości XX kibibajtów oraz z obsługą architektury RV32I - obecność pamięci podręcznej jest szczególnie ważna, gdyż to właśnie na jej potrzeby procesor zawiera wsparcie dla transferów potokowych na magistrali Wishbone.
+Procesor VexRiscv został skonfigurowany z pamięcią podręczną danych wielkości 4 kibibajtów oraz z obsługą architektury RV32I - obecność pamięci podręcznej jest szczególnie ważna, gdyż to właśnie na jej potrzeby procesor zawiera wsparcie dla transferów potokowych na magistrali Wishbone.
 Z czterech pamięci SRAM dwa są w trybie tylko do odczytu - zawierać będą program rozruchowy oraz program testowy, które załadowane będą jako część bitstreamu dla układu FPGA.
 
 \todo[inline]{RYSUNEK: schemat blokowy TestSoC}
@@ -190,7 +190,7 @@ int main(void)
 \end{listing}
 
 Funkcje odpowiadające za przeprowadzenie testu są dostępne w ramach biblioteki libbase, będącej częścią frameworka LiteX - o ile funkcje można wywołać z poziomu konsoli programu rozruchowego, to program na etapie budowania zapisuje adres startowy oraz pojemność testowanej pamięci przekazany przez skrypt budujący układ platformy testowej, pozwalając na automatyczne wykonanie testu w momencie załadowania bitstreamu na układ FPGA lub uruchomienia symulatora.
-Dodatkową funkcjonalnością, dostępną w przypadku uruchomienia testu w symulacji, jest śledzenie wykonywania poprzez możliwość zapisywania "flagi" pod określonym wcześniej adresem - zawartość tego adresu jest potem zapisywana w pliku z przebiegami sygnałów emulowanego systemu, dzięki czemu można zbadać, jakie operacje na magistrali są wykonywane w danym fragmencie testu.
+Dodatkową funkcjonalnością, dostępną w przypadku uruchomienia testu w symulacji, jest śledzenie wykonywania poprzez możliwość zapisywania flagi pod określonym wcześniej adresem - zawartość tego adresu jest potem zapisywana w pliku z przebiegami sygnałów emulowanego systemu, dzięki czemu można zbadać, jakie operacje na magistrali są wykonywane w danym fragmencie testu.
 
 \todo[inline]{DIAGRAM: proces kompilacji}
 
