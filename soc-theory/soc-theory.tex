@@ -7,15 +7,15 @@ Komputery jednopłytkowe, których istnienie zawdzięczyć można postępowi min
 Pierwsze komputery jednopłytkowe powstały w latach 70-tych\cite{Ariza_2021}, często w formie zestawu do samodzielnego złożenia i uruchomienia. Były one tańszą alternatywą dla większych systemów komputerowych, oferując podstawowe peryferia wymagane do tworzenia oprogramowania i interakcji z nim.
 W późniejszych czasach komputery jednopłytkowe były coraz częściej wykorzystywane w systemach przemysłowych, głównie z powodu większej integracji komponentów i większej wytrzymałości niż systemy złożone z większej ilości elementów takich jak karty rozszerzeń.
 
-Po upowszechnieniu się standardów takich jak IBM PC, część komputerów jednopłytkowych powstających w późniejszym czasie wykorzystywały elementy architektury IBM PC.Umożliwiło to wytwarzanie i uruchamianie programów oryginalnie przeznaczonych dla komputerów zgodnych z tymi standardami.
+Po upowszechnieniu się standardów takich jak IBM PC\cite{ibmpc1981}, część komputerów jednopłytkowych powstających w późniejszym czasie zaczęły wykorzystywać komponenty takie jak procesory architektury x86. Umożliwiło to wytwarzanie i uruchamianie programów oryginalnie przeznaczonych dla komputerów zgodnych z tymi standardami. Obecnie jednak, ze względu między innymi na mniejsze zużycie prądu, najczęściej wykorzystuje się układy bazujące na procesorach architektury ARM, znanej z urządzeń mobilnych.
 
 Obecnie komputery jednopłytkowe większość funkcjonalności mają zawarte w pojedynczym układzie, zwanym System on Chip (system jednoukładowy). Poprzez redukcję ilości elementów na płytce drukowanej możliwym było zredukowanie rozmiarów komputerów jednopłytkowych, czasami zbliżając się rozmiarami do karty bankowej.
 
 Przykładami popularnych obecnie komputerów jednopłytkowych, zbudowanych z użyciem układów SoC, są:
 \begin{itemize}
-	\item Raspberry Pi (Raspberry Pi Trading, Ltd.)
-	\item BeagleBoard (Texas Instruments, BeagleBoard.org Foundation)
-	\item Orange Pi (Shenzhen Xunlong Software Co., Ltd.)
+	\item Raspberry Pi\cite{rpi1bplus} (Raspberry Pi Trading, Ltd.),
+	\item BeagleBoard\cite{beagleboard} (Texas Instruments, BeagleBoard.org Foundation),
+	\item UDOO Bolt\cite{udoobolt} (SECO S.P.A.)
 \end{itemize}
 
 \todo[inline]{ZDJĘCIE: popularny komputer jednopłytkowy}
@@ -32,21 +32,36 @@ Typowy układ SoC posiada przynajmniej jedną jednostkę centralną o stosunkowo
 
 \todo[inline]{RYSUNEK: budowa systemu jednoukładowego - jednostka centralna, magistrala, peryferia}
 
+Wśród różnych rodzin układów SoC, stosowanych w komputerach jednoukładowych, wymienić można:
+\begin{itemize}
+	\item OMAP\cite{omap3530} firmy Texas Instruments,
+	\item Vortex86\cite{vortex86ex2} firmy DM\&P,
+	\item JH71x0\cite{jh7110} firmy Shanghai StarFive Technology
+\end{itemize}
+
 \subsection{Opis wybranej implementacji procesora z ISA RISC-V}
+
+Łatwa dostępność dokumentacji związanej z architekturą RISC-V spowodowała, że istnieje duża ilość projektów implementujących procesory z nią zgodne. Procesory te są w większości zoptymalizowane do uruchomienia na układach FPGA (Field Programmable Gate Array), różniąc się w większości wewnętrzną architekturą oraz udostępnioną funkcjonalnością.
+
+Przykładowe projekty procesorów gotowych do wykorzystania w projektach bazujących na układach FPGA to:
+\begin{itemize}
+	\item PicoRV32\cite{picorv32} autorstwa Claire Wolf,
+	\item Ibex\cite{ibex} od grupy lowRISC C.I.C.,
+	\item rodzina OpenXuantie\cite{openxuantie} firmy T-Head Semiconductor
+\end{itemize}
 
 Na potrzeby tej pracy został wybrany projekt VexRiscv\cite{vexriscv:2018:Online}, który jest rdzeniem implementującym architekturę RISC-V\cite{Waterman:EECS-2014-54} w wariancie 32-bitowym (RV32I), zoptymalizowanym pod kątem układów FPGA. Jego modularność z użyciem rozszerzeń pozwala na konfigurację parametrów na etapie budowania rdzenia w zależności od wymogów projektu, takich jak ilość etapów potoku wykonywania rozkazów, wspierane rozszerzenia architektury czy wielkość pamięci podręcznej poziomu pierwszego.
 
 Wśród dostępnych opcji konfiguracyjnych są takie elementy jak:
 \begin{itemize}
-	\item opcjonalne rozkazy z rozszerzeń MAFDC zdefiniowanych dla architektury RISC-V,
+	\item opcjonalne rozkazy m.in. mnożenia, operacji na liczbach zmiennoprzecinkowych zdefiniowanych dla architektury RISC-V,
 	\item regulowana długość potoku wykonawczego od 2 do 5 stopni,
 	\item możliwość podłączenia procesora do dowolnej magistrali, z czego dostępne są adaptery dla magistral AXI4, Avalon oraz Wishbone,
 	\item opcjonalna pamięć podręczna programu i danych, każda w dowolnej ilości,
 	\item opcjonalna jednostka zarządzania pamięcią (MMU)
 \end{itemize}
 
-Na potrzeby tego projektu użyta zostanie podstawowa konfiguracja, nie zawierająca dodatkowych rozkazów, ze względu na ograniczone zasoby układu FPGA, na którym realizowane będą testy wydajnościowe. Oprócz tego dodana zostanie pamięć podręczna danych, która odpowiedzialna będzie za buforowanie odczytywanych danych.
-\todo[inline]{ROZBIJ}
+Wybór tego procesora na potrzeby pracy został podyktowany przede wszystkim wcześniejszym doświadczeniem autora niniejszej pracy w pracy z tym projektem. Na potrzeby tej pracy użyta zostanie podstawowa konfiguracja. Ze względu na możliwe ograniczenia związane z platformą testową (na przykład rozmiar układu FPGA), wyłączone zostało wsparcie dla wszystkich opcjonalnych grup rozkazów. W zamian dodana zostanie pamięć podręczna danych, która odpowiedzialna będzie za buforowanie odczytywanych z potencjalnie wolniejszej pamięci operacyjnej danych.
 
 \subsection{Przegląd dostępnych magistrali systemowych}
 
@@ -67,4 +82,4 @@ W ramach tej pracy wykorzystywana będzie magistrala Wishbone ze względu na w p
 
 \subsection{Wnioski}
 
-Jako, iż celem tej pracy jest poprawa wydajności systemu jednoukładowego, na początek wymagane było zdefiniowanie, czym ów system jest z uwzględnieniem tła historycznego oraz jaka jest typowa konstrukcja takiego układu. Po określeniu najważniejszych elementów takiego systemu, możliwym jest przeanalizowanie ograniczeń poszczególnych elementów, które mogą mieć wpływ na wydajność całego systemu. Identyfikacja tak zwanych "wąskich gardeł" i ich eliminacja pozwala niskim kosztem zwiększyć wydajność bez konieczności zmian w całym systemie mogących mieć wpływ na czynniki takie jak taktowanie całego systemu zegarem o większej częstotliwości, mogące powodować zwiększenie poboru prądu przez taki system.
+Jako, iż celem tej pracy jest poprawa wydajności systemu jednoukładowego, na początek wymagane było zdefiniowanie, czym ów system jest z uwzględnieniem tła historycznego oraz jaka jest typowa konstrukcja takiego układu. Po określeniu najważniejszych elementów takiego systemu dobrane zostały główne elementy, które będą wykorzystywane w niniejszej pracy: procesor VexRiscv, obsługujący rozkazy architektury RISC-V, oraz magistrala Wishbone, która definiować będzie sposób komunikacji między poszczególnymi elementami układu SoC.

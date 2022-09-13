@@ -253,5 +253,6 @@ W celu uproszczenia kodu sygnał $adr_burst$ jest zawsze generowany w układzie,
 
 \subsection{Wnioski po optymalizacji wybranego peryferium}
 
+Omówiona została magistrala Wishbone, bazując zarówno na specyfikacji jak i przykładowej implementacji zawartej w projekcie LiteX.
+Na potrzeby dalszych działań przedstawione zostały moduły pamięci SRAM oraz prosty interfejs wejścia/wyjścia zbudowany z dwóch kolejek FIFO. Pozwoliło to na zademonstrowanie sposobu implementacji wybranej optymalizacji, czyli transferów potokowych, w istniejących modułach.
 Dzięki prostocie implementacji interfejsu magistrali w module pamięci SRAM jak i samego modułu wprowadzenie obsługi transferów potokowych nie wymagało większych zmian w logice interfejsu - całość została sprowadzona do zaimplementowania licznika adresu po stronie modułu oraz dodatkowych warunków w logice synchronizującej komunikację po magistrali Wishbone.
-\todo[inline]{Co jeszcze można dodać?}

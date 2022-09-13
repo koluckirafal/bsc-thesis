@@ -1,14 +1,14 @@
 \section{Projektowanie, testowanie i uruchamianie układu SoC}
 
-\subsection{Konstruowanie układu SoC z użyciem frameworka LiteX}
+\subsection{Konstruowanie układu SoC z użyciem systemu LiteX}
 
 O ile układ SoC można zaprojektować w całości od podstaw, częstą praktyką jest wykorzystywanie gotowych komponentów, często napisanych przez zewnętrznych dostawców, w celu szybszego zaprojektowania układu spełniającego założenia projektowe.
 
-Framework LiteX\cite{https://doi.org/10.48550/arxiv.2005.02506} dostarcza różnego rodzaju komponenty oraz narzędzia pozwalające na zbudowanie zarówno kompletnego układu SoC jak i bardziej specjalizowanych systemów w formie syntezowalnej logiki. W tym celu wykorzystuje bibliotekę Migen\cite{migen:2016:Online}, która implementuje język opisu sprzętu w formie obiektów w języku Python\cite{10.5555/1593511}. Dzięki temu możliwe jest opisanie logiki wykorzystując popularny język programowania wykorzystujący znajomą składnię, co zmniejsza barierę wejścia; oprócz tego można wykorzystać narzędzia z ekosystemu języka Python, dzięki czemu dostępne są między innymi większe możliwości parametryzacji logiki czy systemy do przeprowadzania testów automatycznych. Jednocześnie możliwe jest łączenie logiki napisanej w innych językach, co ułatwia wykorzystywanie komponentów nie będących częścią frameworka.
+LiteX\cite{https://doi.org/10.48550/arxiv.2005.02506} jest zbiorem narzędzi oraz komponentów, pozwalający na zbudowanie zarówno kompletnego układu SoC jak i bardziej specjalizowanych systemów w formie syntezowalnej logiki. W tym celu wykorzystuje bibliotekę Migen\cite{migen:2016:Online}, która implementuje język opisu sprzętu w formie obiektów w języku Python\cite{10.5555/1593511}. Dzięki temu możliwe jest opisanie logiki wykorzystując popularny język programowania wykorzystujący znajomą składnię, co zmniejsza barierę wejścia; oprócz tego można wykorzystać narzędzia z ekosystemu języka Python, dzięki czemu dostępne są między innymi większe możliwości parametryzacji logiki czy systemy do przeprowadzania testów automatycznych. Jednocześnie możliwe jest łączenie logiki napisanej w innych językach, co ułatwia wykorzystywanie komponentów spoza zestawu LiteX.
 
-\todo[inline]{RYSUNEK: Budowa frameworka LiteX}
+\todo[inline]{RYSUNEK: Budowa systemu LiteX}
 
-LiteX został wybrany jako podstawa tego projektu ze względu na dużą popularność tego frameworka w otwarto-źródłowych projektach wykorzystujących układy FPGA oraz z powodu doświadczenia autora niniejszej pracy nabytej poprzez wykorzystanie frameworka w swoich poprzednich projektach.
+LiteX został wybrany jako podstawa tego projektu ze względu na dużą popularność tego systemu w otwarto-źródłowych projektach wykorzystujących układy FPGA oraz z powodu doświadczenia autora niniejszej pracy nabytej poprzez wykorzystanie go w swoich poprzednich projektach.
 
 \subsection{Symulowanie układu z użyciem LiteX i Verilator}
 
