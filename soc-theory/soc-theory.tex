@@ -28,9 +28,14 @@ Pojedynczy układ SoC składa się z przynajmniej jednej jednostki centralnej, p
 
 Układy SoC odróżniają się od mikrokontrolerów tym, iż zawierają w sobie jak największą funkcjonalność możliwą do zmieszczenia w określonym rozmiarze fizycznym, uwzględniając takie ograniczenia jak dostępny proces technologiczny czy pobór prądu. Mikrokontrolery za to posiadają ograniczoną ilość peryferiów oraz mocy obliczeniowej w celu redukcji kosztów, co jest ważne w przypadku urządzeń wymagających specyficznej funkcjonalności w ograniczonym budżecie.
 
-Typowy układ SoC posiada przynajmniej jedną jednostkę centralną o stosunkowo dużej mocy obliczeniowej, które pozwalają na uruchamianie pełnoprawnych systemów operacyjnych, takich jak Linux czy Microsoft Windows. Oprócz tego wymagają dodatkowo zewnętrznych pamięci RAM i ROM, gdyż oprogramowanie, które będzie uruchamiane na danym układzie, wymaga często dużych ilości pamięci, której nie da się zintegrować w samym układzie SoC.
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7,trim={0 3cm 3cm 0.3cm},clip]{soc-theory/diag-soc-schem.pdf}
+\caption{Uproszczony schemat typowego układu System on Chip}
+\label{fig:soc-schem}
+\end{figure}
 
-\todo[inline]{RYSUNEK: budowa systemu jednoukładowego - jednostka centralna, magistrala, peryferia}
+Na rysunku \ref{fig:soc-schem} przedstawiony został schemat przykładowego układu SoC. Posiada on przynajmniej jedną jednostkę centralną o stosunkowo dużej mocy obliczeniowej, która pozwala na uruchamianie pełnoprawnych systemów operacyjnych, takich jak Linux czy Microsoft Windows. Oprócz tego zaznaczony został kontroler DRAM, który odpowiada za komunikację z zewnętrzną pamięcią RAM. Pamięć ta nie jest zintegrowana w samym układzie SoC ze względu na ograniczone rozmiary układu oraz umożliwienie wybrania rozmiaru pamięci, jaka będzie wykorzystywana w danym systemie jednoukładowym. Procesor, interfejs pamięci głównej oraz pozostałe peryferia są połączone jedną lub większą ilością magistral, które odpowiadają za transfer danych między komponentami systemu. Mogą różnić się one takimi parametrami jak przepustowość lub szerokość linii danych, zaś dane między nimi są wymieniane z użyciem mostków.
 
 Wśród różnych rodzin układów SoC, stosowanych w komputerach jednoukładowych, wymienić można:
 \begin{itemize}

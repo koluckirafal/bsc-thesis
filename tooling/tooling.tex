@@ -6,7 +6,14 @@ O ile układ SoC można zaprojektować w całości od podstaw, częstą praktyk�
 
 LiteX\cite{https://doi.org/10.48550/arxiv.2005.02506} jest zbiorem narzędzi oraz komponentów, pozwalający na zbudowanie zarówno kompletnego układu SoC jak i bardziej specjalizowanych systemów w formie syntezowalnej logiki. W tym celu wykorzystuje bibliotekę Migen\cite{migen:2016:Online}, która implementuje język opisu sprzętu w formie obiektów w języku Python\cite{10.5555/1593511}. Dzięki temu możliwe jest opisanie logiki wykorzystując popularny język programowania wykorzystujący znajomą składnię, co zmniejsza barierę wejścia; oprócz tego można wykorzystać narzędzia z ekosystemu języka Python, dzięki czemu dostępne są między innymi większe możliwości parametryzacji logiki czy systemy do przeprowadzania testów automatycznych. Jednocześnie możliwe jest łączenie logiki napisanej w innych językach, co ułatwia wykorzystywanie komponentów spoza zestawu LiteX.
 
-\todo[inline]{RYSUNEK: Budowa systemu LiteX}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7,trim={0 6cm 0 0.3cm},clip]{tooling/diag-litex.pdf}
+\caption{Struktura projektu układu logicznego opartego na systemie LiteX}
+\label{fig:litex-project-schem}
+\end{figure}
+
+Na rysunku \ref{fig:litex-project-schem} przedstawiona została struktura projektu układu logicznego zbudowanego z wykorzystaniem systemu LiteX. Elementy takie, jak generowanie skryptów budujących układ logiczny czy podstawowe peryferia wejścia/wyjścia są integralną częścią tego systemu, co pozwala użytkownikowi skupić się na tworzeniu samego układu. Główną część układu, definiującą między innymi połączenia między komponentami oraz sygnały wejścia/wyjścia, opisuje się w języku Python z użyciem biblioteki Migen. Opis ten na etapie budowania, łącznie z dodatkowymi modułami wykorzystującymi bibliotekę Migen, jest przetwarzany następnie do formy kodu opisu sprzętu w języku Verilog. Możliwym jest też dodanie komponentów zaimplementowanych w językach Verilog oraz VHDL - w tym wypadku źródła nie są przetwarzane, tylko są przekazywane bezpośrednio do skryptu budującego. Skrypt budujący, w zależności od opisu platformy docelowej, może zbudować projekt do formy pliku binarnego dla układu FPGA z użyciem dedykowanych narzędzi lub zbudować program symulatora, który można uruchomić na komputerze osobistym.
 
 LiteX został wybrany jako podstawa tego projektu ze względu na dużą popularność tego systemu w otwarto-źródłowych projektach wykorzystujących układy FPGA oraz z powodu doświadczenia autora niniejszej pracy nabytej poprzez wykorzystanie go w swoich poprzednich projektach.
 
