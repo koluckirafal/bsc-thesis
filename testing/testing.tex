@@ -14,7 +14,12 @@ Ze względu na to, iż obserwujemy wyłącznie stan zewnętrzny, do pamięci Blo
 Testy zostały zrealizowane z użyciem języka Python, wykorzystując bibliotekę Cocotb, która umożliwia tworzenie środowiska testowego z użyciem składni języka Python zamiast w Verilogu. Pozwala to na integrację z bibliotekami ekosystemu języka Python, ułatwiając takie sprawy jak generowanie testowego zbioru danych.
 Oprócz tego wykorzystane zostały biblioteki cocotb-test\cite{cocotb-test} oraz cocotbext-wishbone. Cocotb-test integruje Cocotb z systemem testów automatycznych pytest\cite{pytest6.2}, dzięki czemu napisane testy można uruchamiać z różnymi ustawieniami, co w połączeniu z parametryzacją samych testów umożliwia pokrycie różnych sposobów komunikacji z testowanym podzespołem na magistrali. Cocotbext-wishbone zaś implementuje funkcje do sterowania i monitorowania sygnałów na magistrali Wishbone, co pozwala zaoszczędzić czas poprzez wywoływanie gotowych funkcji realizujących operacje na magistrali zamiast poprzez ręczne sterowanie szyną.
 
-\todo[inline]{DIAGRAM: pipeline testów}
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=1,trim={0 7.7cm 8.5cm 0},clip]{testing/testing-pipeline.pdf}
+    \caption{Schemat systemu testów jednostkowych zbudowany z wykorzystaniem biblioteki \texttt{cocotb}}
+    \label{fig:testing-pipeline}
+\end{figure}
 
 Testowane peryferia, czyli pamięć SRAM oraz transceiver FIFO, zostały zainstancjonowane w minimalnym module LiteX, który na zewnątrz udostępnia wspólną magistralę Wishbone, drugi port pamięci SRAM, wyjście nadawczej kolejki FIFO oraz wejście odbiorczej kolejki FIFO. W ten sposób mamy dostęp do wszystkich sygnałów, które posłużą do wysterowania magistrali oraz komunikacji z peryferiami inną drogą, umożliwiając obserwowanie wpływu implementacji interfejsu Wishbone na komunikację z peryferiami. Jako że biblioteka Cocotb oczekuje opisu układu w języku Verilog, moduł LiteX jest eksportowany do pliku Verilog przed rozpoczęciem wykonywania testów.
 
@@ -131,10 +136,9 @@ async def test_read(dut):
 \caption{\label{lst:harness-sampletest}Fragment testu w języku Python realizującego operację odczytu wybranej ilości słów poprzez magistralę Wishbone}
 \end{longlisting}
 
-
 \subsubsection{Porównanie wyników testów}
 
-\todo[inline]{RYSUNEK: Przebiegi dla każdego rodzaju peryferiów i każdego rodzaju cykli}
+\todo[inline]{DIAGRAM: WAŻNE: Przebiegi dla każdego rodzaju peryferiów i każdego rodzaju cykli}
 
 \subsection{Testy wydajnościowe systemu jednoukładowego na symulatorze oraz na układzie FPGA}
 
@@ -142,9 +146,14 @@ Po zweryfikowaniu poprawności działania peryferiów kolejnym etapem jest przep
 
 \subsubsection{Wykorzystane urządzenia}
 
-Testy wydajnościowe były wykonywane w dwóch środowiskach: na zestawie deweloperskim Digilent Arty A7-35\cite{digilent-arty-a7}, zawierającym układ programowalnych bramek logicznych Artix-7 firmy Xilinx, oraz na symulatorze uruchomionym na średniej klasy komputerze klasy PC będącym pod kontrolą systemu operacyjnego Debian GNU/Linux\cite{debian11}. Symulator został automatycznie zbudowany poprzez framework LiteX z użyciem programu Verilator, zaś plik konfigurujący zachowanie układu FPGA (zwany bitstreamem) zbudowany został z wykorzystaniem zbioru narzędzi do syntezy Vivado\cite{vivado2019.1} firmy Xilinx oraz, na potrzeby testowania kompatybilności, zestawu narzędzi F4PGA\cite{f4pga}.
+Testy wydajnościowe były wykonywane w dwóch środowiskach: na przedstawionym na zdjęciu \ref{fig:arty-a7-photo} zestawie deweloperskim Digilent Arty A7-35\cite{digilent-arty-a7}, zawierającym układ programowalnych bramek logicznych Artix-7 firmy Xilinx, oraz na symulatorze uruchomionym na średniej klasy komputerze klasy PC będącym pod kontrolą systemu operacyjnego Debian GNU/Linux\cite{debian11}. Symulator został automatycznie zbudowany poprzez framework LiteX z użyciem programu Verilator, zaś plik konfigurujący zachowanie układu FPGA (zwany bitstreamem) zbudowany został z wykorzystaniem zbioru narzędzi do syntezy Vivado\cite{vivado2019.1} firmy Xilinx oraz, na potrzeby testowania kompatybilności, zestawu narzędzi F4PGA\cite{f4pga}.
 
-\todo[inline]{RYSUNEK: zdjęcie arty-a7, output z symulatora lub inne jego przedstawienie}
+\begin{figure}[H]
+	\centering
+	\includegraphics[angle=90,scale=0.3,trim={3cm 0 6cm 0},clip]{testing/photo_2022-09-16_13-47-42.jpg}
+	\caption{Płytka deweloperska Digilent Arty-A7 z układem FPGA Xilinx Artix-7}
+	\label{fig:arty-a7-photo}
+\end{figure}
 
 \subsubsection{Testowy układ SoC i jego architektura}
 
@@ -152,7 +161,12 @@ Testowy system mikroprocesorowy składa się z procesora VexRiscv, czterech blok
 Procesor VexRiscv został skonfigurowany z pamięcią podręczną danych wielkości 4 kibibajtów oraz z obsługą architektury RV32I - obecność pamięci podręcznej jest szczególnie ważna, gdyż to właśnie na jej potrzeby procesor zawiera wsparcie dla transferów potokowych na magistrali Wishbone.
 Z czterech pamięci SRAM dwa są w trybie tylko do odczytu - zawierać będą program rozruchowy oraz program testowy, które załadowane będą jako część bitstreamu dla układu FPGA.
 
-\todo[inline]{RYSUNEK: schemat blokowy TestSoC}
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=1,trim={0 4.9cm 5.6cm 0},clip]{testing/benchmark-soc-diag.pdf}
+	\caption{Schemat blokowy układu SoC użytego do przeprowadzenia testów wydajnościowych}
+	\label{fig:benchmark-soc-diag}
+\end{figure}
 
 \subsubsection{Program dla jednostki centralnej RISC-V badający szybkość operacji na pamięci}
 
@@ -193,7 +207,16 @@ int main(void)
 Funkcje odpowiadające za przeprowadzenie testu są dostępne w ramach biblioteki libbase, będącej częścią frameworka LiteX - o ile funkcje można wywołać z poziomu konsoli programu rozruchowego, to program na etapie budowania zapisuje adres startowy oraz pojemność testowanej pamięci przekazany przez skrypt budujący układ platformy testowej, pozwalając na automatyczne wykonanie testu w momencie załadowania bitstreamu na układ FPGA lub uruchomienia symulatora.
 Dodatkową funkcjonalnością, dostępną w przypadku uruchomienia testu w symulacji, jest śledzenie wykonywania poprzez możliwość zapisywania flagi pod określonym wcześniej adresem - zawartość tego adresu jest potem zapisywana w pliku z przebiegami sygnałów emulowanego systemu, dzięki czemu można zbadać, jakie operacje na magistrali są wykonywane w danym fragmencie testu.
 
-\todo[inline]{DIAGRAM: proces kompilacji}
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.8,trim={0 3.9cm 3.5cm 0},clip]{testing/benchmark-program-pipeline.pdf}
+	\caption{Proces budowania programu testowego}
+	\label{fig:benchmark-program-pipeline}
+\end{figure}
+
+W celu skompilowania programu testowego użyty został kompilator GCC, skonfigurowany do emitowania kodu na platformę \texttt{riscv32-unknown-elf} - czyli 32-bitowego procesora RISC-V bez określonego systemu operacyjnego. Proces kompilacji, przedstawiony na rysunku \ref{fig:benchmark-program-pipeline}, jest opisany w pliku \texttt{Makefile}, który jest wywoływany przez skrypt budujący układ testowy. W czasie uruchamiania programu Make ustawiane są zmienne środowiskowe, które przechowują ścieżki do plików nagłówkowych definiujących adresy rejestrów w wygenerowanym układzie czy plik \texttt{crt0.s} dedykowany wybranemu głównemu procesorowi. Plik \texttt{crt0.s} przechowuje kod, którego zadaniem jest inicjalizacja pamięci programu przed przeskoczeniem do jego głównej procedury. Razem z kodem startowym i kodem programu testowego łączone są również biblioteki dostarczone przez system LiteX, wliczając w to standardową bibliotekę języka C.
+
+Skompilowany program zostaje zapisany w pliku ELF, który oprócz samego kodu przechowuje informacje o wymaganych obszarach pamięci czy platformie, dla której przeznaczony jest ten program. Informacje te nie są wykorzystywane przez dołączony do systemu LiteX program rozruchowy o nazwie BIOS, który został skompilowany w czasie budowania układu testowego - w tym celu z pliku ELF zostanie wyciągnięty fragment, który zawiera właściwy kod wykonywalny. Można tego dokonać z użyciem programu \texttt{objcopy}, który jest wywoływany automatycznie w skrypcie Makefile. Żeby BIOS jednak mógł załadować program testowy do głównej pamięci SRAM, na początku pliku musi być również informacja o rozmiarze kodu. Informacja zostaje dodana z użyciem skryptu \texttt{mkmscimg}, będącym jednym z narzędzi dostarczonym z systemem LiteX. Wynikowy plik z rozszerzeniem \texttt{.fbi} zostaje na koniec dodany jako zawartość aplikacyjnej pamięci ROM wygenerowanego układu.
 
 \subsubsection{Wyniki testów wydajnościowych}
 
@@ -259,8 +282,6 @@ Na podstawie wyników można zauważyć, iż prędkość odczytu z pamięci wzro
 
 Brak zmian w prędkości zapisu można wytłumaczyć tym, iż procesor wykonywuje kilka operacji, zanim pojedyncze słowo będzie gotowe do zapisania w pamięci - tym samym transfery potokowe nie zachodzą, gdyż nie jest możliwym przygotowanie nowych słów w każdym kolejnym takcie zegara.
 Podobnie można wytłumaczyć również zmianę w prędkości odczytu - procesor w jednym cyklu potokowym odczytuje tyle słów, ile można zmieścić w pojedynczej linii pamięci podręcznej - dzięki temu procesor szybciej może pobrać dane z kilku sąsiadujących adresów. Przy bardziej odległych od siebie adresach procesor musi jednak ponownie pobrać dane bezpośrednio z pamięci RAM, gdyż nie zostały one załadowane do pamięci podręcznej przy poprzedniej operacji odczytu potokowego.
-
-%\subsection{CFU Plauground - w razie jakby nie udało się wycisnąć mininalnej ilości tekstu}
 
 \subsection{Wnioski po realizacji testów}
 
