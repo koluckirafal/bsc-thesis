@@ -2,7 +2,7 @@
 
 \subsection{Wprowadzenie do komputerów jednopłytkowych}
 
-Komputery jednopłytkowe, których istnienie zawdzięczyć można postępowi miniaturyzacji układów scalonych, to systemy komputerowe, które zawierają całą wymaganą funkcjonalność na pojedynczej płytce drukowanej. Od typowego systemu komputerowego różni je to, że zwykle nie posiadają gniazd rozszerzeń, które byłyby wykorzystywane do rozbudowania komputera o dodatkowe lub czasami nawet wymagane rozszerzenia, które byłyby potrzebne w wybranym zastosowaniu danego systemu komputerowego. Pozwala to na zredukowanie ceny kosztem ograniczonych możliwości rozbudowy komputera.
+Komputery jednopłytkowe, których istnienie zawdzięczać można postępowi miniaturyzacji układów scalonych, to systemy komputerowe, które zawierają całą wymaganą funkcjonalność na pojedynczej płytce drukowanej. Od typowego systemu komputerowego różni je to, że zwykle nie posiadają gniazd rozszerzeń, które byłyby wykorzystywane do rozbudowania komputera o dodatkowe lub czasami nawet wymagane rozszerzenia, które byłyby potrzebne w wybranym zastosowaniu danego systemu komputerowego. Pozwala to na zredukowanie ceny kosztem ograniczonych możliwości rozbudowy komputera.
 
 Pierwsze komputery jednopłytkowe powstały w latach 70-tych\cite{Ariza_2021}, często w formie zestawu do samodzielnego złożenia i uruchomienia. Były one tańszą alternatywą dla większych systemów komputerowych, oferując podstawowe peryferia wymagane do tworzenia oprogramowania i interakcji z nim.
 W późniejszych czasach komputery jednopłytkowe były coraz częściej wykorzystywane w systemach przemysłowych, głównie z powodu większej integracji komponentów i większej wytrzymałości niż systemy złożone z większej ilości elementów takich jak karty rozszerzeń.
@@ -29,7 +29,7 @@ Przykładami popularnych obecnie komputerów jednopłytkowych, zbudowanych z uż
 
 Układy typu System on Chip (SoC) to układy, które na jednym podłożu półprzewodnikowym integrują wszystkie komponenty składające się na kompletny system mikroprocesorowy. Dzięki wysokiemu stopniu integracji układy te pozwoliły na znaczną miniaturyzację urządzeń elektronicznych bazujących na systemach mikroprocesorowych, takich jak telefony komórkowe czy komputery przenośne, oraz na ograniczenie kosztów przy większej skali produkcji.
 
-Pojedynczy układ SoC składa się z przynajmniej jednej jednostki centralnej, pamięci RAM i ROM pozwalających na uruchomienie kodu inicjalizującego układ, peryferiów pozwalających na komunikowanie się ze światem zewnętrznym oraz jednej lub więcej magistral, które łączą wcześniej wspomniane peryferia.
+Pojedynczy układ SoC składa się z przynajmniej jednej jednostki centralnej, pamięci RAM i ROM pozwalających na uruchomienie kodu inicjalizującego podstawowe komponenty układu, peryferiów pozwalających na komunikowanie się ze światem zewnętrznym oraz jednej lub więcej magistral, które łączą wcześniej wspomniane peryferia.
 
 Układy SoC odróżniają się od mikrokontrolerów tym, iż zawierają w sobie jak największą funkcjonalność możliwą do zmieszczenia w określonym rozmiarze fizycznym, uwzględniając takie ograniczenia jak dostępny proces technologiczny czy pobór prądu. Mikrokontrolery za to posiadają ograniczoną ilość peryferiów oraz mocy obliczeniowej w celu redukcji kosztów, co jest ważne w przypadku urządzeń wymagających specyficznej funkcjonalności w ograniczonym budżecie.
 
@@ -40,7 +40,7 @@ Układy SoC odróżniają się od mikrokontrolerów tym, iż zawierają w sobie 
 \label{fig:soc-schem}
 \end{figure}
 
-Na rysunku \ref{fig:soc-schem} przedstawiony został schemat przykładowego układu SoC. Posiada on przynajmniej jedną jednostkę centralną o stosunkowo dużej mocy obliczeniowej, która pozwala na uruchamianie pełnoprawnych systemów operacyjnych, takich jak Linux czy Microsoft Windows. Oprócz tego zaznaczony został kontroler DRAM, który odpowiada za komunikację z zewnętrzną pamięcią RAM. Pamięć ta nie jest zintegrowana w samym układzie SoC ze względu na ograniczone rozmiary układu oraz umożliwienie wybrania rozmiaru pamięci, jaka będzie wykorzystywana w danym systemie jednoukładowym. Procesor, interfejs pamięci głównej oraz pozostałe peryferia są połączone jedną lub większą ilością magistral, które odpowiadają za transfer danych między komponentami systemu. Mogą różnić się one takimi parametrami jak przepustowość lub szerokość linii danych, zaś dane między nimi są wymieniane z użyciem mostków.
+Na rysunku \ref{fig:soc-schem} przedstawiony został schemat przykładowego układu SoC. Posiada on przynajmniej jedną jednostkę centralną o stosunkowo dużej mocy obliczeniowej, która pozwala na uruchamianie pełnoprawnych systemów operacyjnych, takich jak Linux czy Microsoft Windows. Oprócz tego zaznaczony został kontroler DRAM, który odpowiada za komunikację z zewnętrzną pamięcią RAM. Pamięć ta nie jest zintegrowana w samym układzie SoC ze względu na ograniczone rozmiary układu oraz umożliwienie wybrania rozmiaru pamięci, jaka będzie wykorzystywana w danym systemie jednoukładowym. Procesor, interfejs pamięci głównej oraz pozostałe peryferia są połączone jedną lub większą ilością magistral, które odpowiadają za transfer danych między komponentami systemu. Mogą różnić się one takimi parametrami jak przepustowość lub szerokość linii danych, natomiast dane między nimi są wymieniane z użyciem mostków.
 
 Wśród różnych rodzin układów SoC, stosowanych w komputerach jednoukładowych, wymienić można:
 \begin{itemize}
@@ -75,9 +75,9 @@ Wybór tego procesora na potrzeby pracy został podyktowany przede wszystkim wcz
 
 \subsection{Przegląd dostępnych magistrali systemowych}
 
-Magistrale, jak zostało wspomniane w poprzednich podrozdziałach, służą do transferu danych między poszczególnymi komponentami systemu. Od ich parametrów zależy sprawność komunikacji między peryferiami - źle skonfigurowana magistrala może spowalniać działanie całego systemu, przykładowo poprzez ograniczenie przepływności danych.
+Magistrale, jak zostało wspomniane w poprzednich podrozdziałach, służą do transferu danych między poszczególnymi komponentami systemu. Od ich parametrów zależy sprawność komunikacji między peryferiami --- źle skonfigurowana magistrala może spowalniać działanie całego systemu, przykładowo poprzez ograniczenie przepływności danych.
 
-W celu wykorzystania danej szyny, wszystkie komponenty muszą mieć zaimplementowany interfejs, który pozwala na podłączenie się do danej magistrali. Jeśli któreś komponenty implementują interfejs innego mostka niż pozostałe, to można wykorzystać mostki, które pozwalają na konwersję między danymi standardami magistral.
+W celu wykorzystania danej szyny wszystkie komponenty muszą mieć zaimplementowany interfejs, który pozwala na podłączenie się do danej magistrali. Jeśli któreś komponenty implementują interfejs innego mostka niż pozostałe, to można wykorzystać mostki, które pozwalają na konwersję między danymi standardami magistral.
 
 Istnieją różne standardy magistrali przeznaczone dla układów SoC, wśród których bardziej znanymi standardami są:
 \begin{itemize}
@@ -88,7 +88,7 @@ Istnieją różne standardy magistrali przeznaczone dla układów SoC, wśród k
 
 Każda z tych specyfikacji ma swoje unikalne cechy: przykładowo AMBA AXI definiuje niezależne kanały do odczytu i zapisu danych, pozwalając na jednoczesne wykonywanie tych dwóch operacji. Wishbone zaś definiuje wyłącznie sposób przekazywania danych między dwiema modułami, pomijając między innymi kwestię topologii połączeń między elementami.
 
-W ramach tej pracy wykorzystywana będzie magistrala Wishbone ze względu na w pełni dostępną publicznie, wolną od tantiemów specyfikację oraz jej neutralność (nie została stworzona przez dużego producenta mikroprocesorów czy układów FPGA).
+W ramach tej pracy wykorzystywana będzie magistrala Wishbone ze względu na w pełni dostępną publicznie, wolną od dodatkowych kosztów specyfikację oraz jej neutralność (nie została stworzona przez dużego producenta mikroprocesorów czy układów FPGA).
 
 \subsection{Wnioski}
 

@@ -1,17 +1,17 @@
 \section{Realizacja testów i analiza ich wyników}
 
-Po zmodyfikowaniu podzespołu należy sprawdzić, czy oryginalna funkcjonalność nie została w jakiś sposób naruszona oraz czy dodana funkcjonalność działa zgodnie z założeniami. W tym celu podzespół należy poddać procesowi weryfikacji. Można jej dokonać na różne sposoby, zaczynając od testów jednostkowych i integracyjnych, kończąc zaś na weryfikacji formalnej.
-Weryfikacja formalna jest dokładniejsza ze względu na wykorzystywanie formalnych metod matematycznych. Jednocześnie narzędzia, które wykorzystują tę metodę weryfikacji, są mało popularne i mogą nie być udokumentowane w wystarczającym stopniu. Wobec tego zostanie wykorzystana prostsza metoda testów jednostkowych - polega ona na opisaniu sekwencji sygnałów wejściowych testowanego komponentu oraz instrukcji pozwalających na interpretację stanów wyjściowych poprzez porównywanie ich do oczekiwanych wzorców.
+Po zmodyfikowaniu podzespołu należy sprawdzić, czy oryginalna funkcjonalność nie została w jakiś sposób naruszona oraz dodana funkcjonalność działa zgodnie z założeniami. W tym celu podzespół należy poddać procesowi weryfikacji. Można jej dokonać na różne sposoby, zaczynając od testów jednostkowych i integracyjnych, kończąc zaś na weryfikacji formalnej.
+Weryfikacja formalna jest dokładniejsza ze względu na wykorzystywanie formalnych metod matematycznych. Jednocześnie narzędzia, które wykorzystują tę metodę weryfikacji, są mało popularne i mogą nie być udokumentowane w wystarczającym stopniu. Wobec tego zostanie wykorzystana prostsza metoda testów jednostkowych --- polega ona na opisaniu sekwencji sygnałów wejściowych testowanego komponentu oraz instrukcji pozwalających na interpretację stanów wyjściowych poprzez porównywanie ich do oczekiwanych wzorców.
 Testy jednostkowe są często używane przy tworzeniu nowoczesnego oprogramowania komputerowego, przez co narzędzia wykorzystywane w tym procesie są dobrze udokumentowane.
 
 \subsection{Analiza i porównanie przebiegów aktywności magistrali}
 
-Wspomniane testy jednostkowe zostaną wykorzystane w kontekście tej pracy do sprawdzenia, czy dane są poprawnie odczytywane i zapisywane w pamięci Block RAM z wykorzystaniem zarówno klasycznych jak i potokowych cykli operacji na magistrali Wishbone. W tym celu każdy test wygeneruje sekwencję słów oraz adresów docelowych, które będą wykorzystywane zarówno do wytworzenia sygnałów wejściowych oraz jako wzorzec, do którego będzie porównywany stan końcowy testowanej pamięci.
+Wspomniane testy jednostkowe zostaną wykorzystane w kontekście tej pracy do sprawdzenia, czy dane są poprawnie odczytywane i zapisywane w pamięci Block RAM z wykorzystaniem zarówno klasycznych, jak i potokowych cykli operacji na magistrali Wishbone. W tym celu każdy test wygeneruje sekwencję słów oraz adresów docelowych, które będą wykorzystywane do wytworzenia sygnałów wejściowych, jak i jako wzorzec, do którego będzie porównywany stan końcowy testowanej pamięci.
 Ze względu na to, iż obserwujemy wyłącznie stan zewnętrzny, do pamięci Block RAM dostanie dodany drugi port, który będzie pozwalał na dokonywanie operacji na pamięci z pominięciem interfejsu Wishbone.
 
 \subsubsection{Implementacja testów jednostkowych dla peryferiów}
 
-Testy zostały zrealizowane z użyciem języka Python, wykorzystując bibliotekę Cocotb, która umożliwia tworzenie środowiska testowego z użyciem składni języka Python zamiast w Verilogu. Pozwala to na integrację z bibliotekami ekosystemu języka Python, ułatwiając takie sprawy jak generowanie testowego zbioru danych.
+Testy zostały zrealizowane z użyciem języka Python, wykorzystując bibliotekę Cocotb, która umożliwia tworzenie środowiska testowego z użyciem składni języka Python zamiast w języku Verilog. Pozwala to na integrację z bibliotekami ekosystemu języka Python, ułatwiając takie sprawy jak generowanie testowego zbioru danych.
 Oprócz tego wykorzystane zostały biblioteki cocotb-test\cite{cocotb-test} oraz cocotbext-wishbone. Cocotb-test integruje Cocotb z systemem testów automatycznych pytest\cite{pytest6.2}, dzięki czemu napisane testy można uruchamiać z różnymi ustawieniami, co w połączeniu z parametryzacją samych testów umożliwia pokrycie różnych sposobów komunikacji z testowanym podzespołem na magistrali. Cocotbext-wishbone zaś implementuje funkcje do sterowania i monitorowania sygnałów na magistrali Wishbone, co pozwala zaoszczędzić czas poprzez wywoływanie gotowych funkcji realizujących operacje na magistrali zamiast poprzez ręczne sterowanie szyną.
 
 \begin{figure}[H]
@@ -21,7 +21,7 @@ Oprócz tego wykorzystane zostały biblioteki cocotb-test\cite{cocotb-test} oraz
     \label{fig:testing-pipeline}
 \end{figure}
 
-Testowane peryferia, czyli pamięć SRAM oraz moduł transmisyjny, zostały zainstancjonowane w minimalnym module LiteX, który na zewnątrz udostępnia wspólną magistralę Wishbone, drugi port pamięci SRAM, wyjście nadawczej kolejki FIFO (First In, First Out) oraz wejście odbiorczej kolejki FIFO. W ten sposób mamy dostęp do wszystkich sygnałów, które posłużą do wysterowania magistrali oraz komunikacji z peryferiami inną drogą, umożliwiając obserwowanie wpływu implementacji interfejsu Wishbone na komunikację z peryferiami. Dzięki bezpośredniemu dostępowi do badanych peryferiów, z wykorzystaniem dodatkowych sygnałów (przykładowo drugi port pamięci RAM), możliwym było również wstępne zapisanie danych testowych do peryferiów oraz odczytanie wynikowych danych w celu sprawdzenia poprawności transferu danych. Jako, że biblioteka Cocotb oczekuje opisu układu w języku Verilog, moduł LiteX jest przetwarzany do formy kodu w języku Verilog przed rozpoczęciem wykonywania testów.
+Testowane peryferia, czyli pamięć SRAM oraz moduł transmisyjny, zostały zainstancjonowane w minimalnym module LiteX, który na zewnątrz udostępnia wspólną magistralę Wishbone, drugi port pamięci SRAM, wyjście nadawczej kolejki FIFO (First In, First Out) oraz wejście odbiorczej kolejki FIFO. W ten sposób mamy dostęp do wszystkich sygnałów, które posłużą do wysterowania magistrali oraz komunikacji z peryferiami inną drogą, umożliwiając obserwowanie wpływu implementacji interfejsu Wishbone na komunikację z peryferiami. Dzięki bezpośredniemu dostępowi do badanych peryferiów, z wykorzystaniem dodatkowych sygnałów (przykładowo drugi port pamięci RAM), możliwym było również wstępne zapisanie danych testowych do peryferiów oraz odczytanie wynikowych danych w celu sprawdzenia poprawności transferu danych. Jako że biblioteka Cocotb oczekuje opisu układu w języku Verilog, moduł LiteX jest przetwarzany do formy kodu w języku Verilog przed rozpoczęciem wykonywania testów.
 
 \begin{longlisting}
 \begin{minted}{python}
@@ -84,9 +84,9 @@ class BaseSoC(SoCCore):
 \end{longlisting}
 
 \subsubsection{Procedura wykonywania testów}
-Zbiór testów jest wykonywany z użyciem komendy pytest, która jest częścią biblioteki o tej samej nazwie. Według definicji testów z pliku test.py generowana jest lista testów z różnymi kombinacjami parametrów według podanych przedziałów, przykładowo rozmiaru testowanego obszaru pamięci oraz przesunięcia pierwszego używanego adresu. Dzięki temu z czterech rodzajów testów (cykl klasyczny oraz wybrany cykl potokowych dla peryferium FIFO oraz modułu SRAM) otrzymano zbiór 116 testów, które zostają wykonywane po kolei. Po zakończeniu testów program pytest zwraca ich wyniki, które można zapisać również w formacie HTML. Umożliwia to wyfiltrowanie przypadków, dla których testy nie kończą się zgodnie z oczekiwaniami.
+Zbiór testów jest wykonywany z użyciem komendy \texttt{pytest}, która jest częścią biblioteki o tej samej nazwie. Według definicji testów z pliku test.py generowana jest lista testów z różnymi kombinacjami parametrów według podanych przedziałów, przykładowo rozmiaru testowanego obszaru pamięci oraz przesunięcia pierwszego używanego adresu. Dzięki temu z czterech rodzajów testów (cykl klasyczny oraz wybrany cykl potokowych dla każdego peryferium) otrzymano zbiór 116 testów, które zostają wykonywane po kolei. Po zakończeniu testów program \texttt{pytest} zwraca ich wyniki, które można zapisać również w formacie HTML. Umożliwia to wychwycenie przypadków, dla których testy nie kończą się zgodnie z oczekiwaniami.
 
-Poniżej zamieszczony jest przykładowy test, który wykonywuje operację odczytu dowolnej ilości słów, zaczynając od wybranego adresu. Dzięki sparametryzowaniu każdego testu możliwym jest uruchonienie tego samego testu z różnymi parametrami wejściowymi. Umożliwia to testowanie wybranych peryferiów na różne sposoby, wykorzystując między innymi wypełnienie pamięci SRAM lub wejściowej kolejki FIFO losowymi danymi w celu weryfikacji poprawności transferu danych dla różnych zbiorów danych.
+Poniżej zamieszczony jest przykładowy test, który wykonywuje operację odczytu dowolnej ilości słów, zaczynając od wybranego adresu. Dzięki sparametryzowaniu każdego testu możliwym jest uruchomienie tego samego testu z różnymi parametrami wejściowymi. Wykorzystując wypełnienie pamięci SRAM lub wejściowej kolejki FIFO losowymi danymi, możliwym było weryfikowanie poprawności transmisji poprzez porównywanie wynikowych danych ze wzorcem.
 
 \begin{longlisting}
 \begin{minted}{python}
@@ -138,7 +138,7 @@ async def test_read(dut):
 
 \subsubsection{Porównanie wyników testów}
 
-Na podstawie przebiegów wygenerowanych w trakcie wykonywania testów zauważyć można kilka różnic, które wpływają na wydajność transferów danych. Pierwszym z nich jest mniejsza ilość cykli zegarowych, w trakcie których przesłana została określona ilość słów po magistrali.
+Na podstawie przebiegów wygenerowanych w trakcie wykonywania testów zauważyć można kilka różnic, które wpływają na wydajność transferów danych. Pierwszym z nich jest mniejsza ilość cykli zegarowych, w których trakcie przesłana została określona ilość słów po magistrali.
 Na rysunkach \ref{fig:test-fifo-classic-8} oraz \ref{fig:test-fifo-constant-8} przedstawione zostały przebiegi dla dwóch testów: zapisu ośmiu losowych, 32-bitowych słów z użyciem klasycznego cyklu oraz cyklu potokowego ze stałym adresem. Główną różnicą między tymi przebiegami jest fakt, że w cyklu potokowym każde kolejne słowo było przekazywane w ciągu jednego cyklu zegara. Jest to spowodowane tym, iż ze względu na brak dodatkowych opóźnień moduł transmisyjny był w stanie obsłużyć transfer w każdym cyklu zegara, o czym informował utrzymywany w stanie wysokim sygnał \texttt{ACK}. Strona inicjująca połączenie również nie wymagała dodatkowych opóźnień przy transferze, co było sygnalizowane sygnałem \texttt{STB} będącym w stanie wysokim przez cały czas transmisji.
 
 \begin{figure}[H]
@@ -164,7 +164,7 @@ W celu sprawdzenia poprawności transmisji dane zostaną odebrane z kolejki tran
 	\label{fig:test-fifo-valid-8}
 \end{figure}
 
-Tą samą różnicę w prędkości transmisji zauważyć można również na przebiegach przedstawiających transfer danych z użyciem cykli potokowych z inkrementacją adresu. Na przebiegach z rysunków \ref{fig:test-sram-classic-8} oraz \ref{fig:test-sram-increment-8}, przedstawione zostały cykle odczytu ośmiu słów do pamięci SRAM, która poprzednio została zapełniona wygenerowanymi losowo danymi.
+Tę samą różnicę w prędkości transmisji zauważyć można również na przebiegach przedstawiających transfer danych z użyciem cykli potokowych z inkrementacją adresu. Na przebiegach z rysunków \ref{fig:test-sram-classic-8} oraz \ref{fig:test-sram-increment-8}, przedstawione zostały cykle odczytu ośmiu słów do pamięci SRAM, która poprzednio została zapełniona wygenerowanymi losowo danymi.
 Widoczna jest identyczna różnica jak w poprzednio porównanych przebiegach, czyli transfer drugiego słowa i kolejnych zachodzący w czasie krótszym przy zastosowaniu transferu potokowego.
 
 \begin{figure}[H]
@@ -197,8 +197,8 @@ Poprawność zapisanych danych została sprawdzona poprzez porównanie danych od
 	\label{fig:test-sram-wrapped-8}
 \end{figure}
 
-Na przebiegu z rysunku \ref{fig:test-sram-wrapped-8} przedstawiony został odczyt ośmiu słów z parametrem \texttt{BTE} równym \texttt{0b01}. Wartość ta oznacza, że zawinięcie adresu obejmuje granicę czterech sąsiadujących ze sobą adresów. Odczyt danych poprzez magistralę rozpoczął się od adresu \texttt{0x002}. Po odczytaniu słowa z adresu \texttt{0x003}, kolejne operacje następują na adresach \texttt{0x000}, \texttt{0x001} oraz \texttt{0x006}. Można zauważyć, że dwa najmniej znaczące bity adresów \texttt{0x002} i \texttt{0x006} są identyczne, co pokrywa się z założeniami mechanizmu zawiniętej inkrementacji adresu.
-Po posortowaniu zapisanych i odebranych danych po ich adresach widocznym jest to, że są one identyczne. Oznacza to, iż dane zostały odczytane z tych samych adresów w pamięci SRAM, pod którymi zostały uprzednio zapisane w innej kolejności (zademonstrowane na przebiegu z rysunku \ref{fig:test-sram-valid-8}).
+Na przebiegu z rysunku \ref{fig:test-sram-wrapped-8} przedstawiony został odczyt ośmiu słów z parametrem \texttt{BTE} równym \texttt{0b01}. Wartość ta oznacza, że zawinięcie adresu obejmuje granicę czterech sąsiadujących ze sobą adresów. Odczyt danych poprzez magistralę rozpoczął się od adresu \texttt{0x002}. Po odczytaniu słowa z adresu \texttt{0x003} kolejne operacje następują na adresach \texttt{0x000}, \texttt{0x001} oraz \texttt{0x006}. Można zauważyć, że dwa najmniej znaczące bity adresów \texttt{0x002} i \texttt{0x006} są identyczne, co pokrywa się z założeniami mechanizmu zawiniętej inkrementacji adresu.
+Po posortowaniu zapisanych i odebranych danych po ich adresach widoczne jest to, że są one identyczne. Oznacza to, iż dane zostały odczytane z tych samych adresów w pamięci SRAM, pod którymi zostały uprzednio zapisane w innej kolejności (zademonstrowane na przebiegu z rysunku \ref{fig:test-sram-valid-8}).
 
 \subsection{Testy wydajnościowe systemu jednoukładowego na symulatorze oraz na układzie FPGA}
 
@@ -206,7 +206,7 @@ Po zweryfikowaniu poprawności działania peryferiów kolejnym etapem jest przep
 
 \subsubsection{Wykorzystane urządzenia}
 
-Testy wydajnościowe były wykonywane w dwóch środowiskach: na przedstawionym na zdjęciu \ref{fig:arty-a7-photo} zestawie deweloperskim Digilent Arty A7-35\cite{digilent-arty-a7}, zawierającym układ programowalnych bramek logicznych Artix-7 firmy Xilinx, oraz na symulatorze uruchomionym na średniej klasy komputerze klasy PC będącym pod kontrolą systemu operacyjnego Debian GNU/Linux\cite{debian11}. Symulator został automatycznie zbudowany poprzez system LiteX z użyciem programu Verilator, zaś plik konfigurujący zachowanie układu FPGA (zwany bitstreamem) zbudowany został z wykorzystaniem zbioru narzędzi do syntezy Vivado\cite{vivado2019.1} firmy Xilinx oraz, na potrzeby testowania kompatybilności, zestawu narzędzi F4PGA\cite{f4pga}.
+Testy wydajnościowe były wykonywane w dwóch środowiskach: na przedstawionym na zdjęciu \ref{fig:arty-a7-photo} zestawie deweloperskim Digilent Arty A7-35\cite{digilent-arty-a7}, zawierającym układ programowalnych bramek logicznych Artix-7 firmy Xilinx, oraz na symulatorze uruchomionym na średniej klasy komputerze klasy PC będącym pod kontrolą systemu operacyjnego Debian GNU/Linux\cite{debian11}. Symulator został automatycznie zbudowany poprzez system LiteX z użyciem programu Verilator, natomiast plik konfigurujący zachowanie układu FPGA (zwany bitstreamem) zbudowany został z wykorzystaniem zbioru narzędzi do syntezy Vivado\cite{vivado2019.1} firmy Xilinx oraz, na potrzeby testowania kompatybilności, zestawu narzędzi F4PGA\cite{f4pga}.
 
 \begin{figure}[H]
 	\centering
@@ -219,7 +219,7 @@ Testy wydajnościowe były wykonywane w dwóch środowiskach: na przedstawionym 
 
 Testowy system mikroprocesorowy składa się z procesora VexRiscv, czterech bloków pamięci SRAM, interfejsu UART do komunikacji między programem testowym a użytkownikiem oraz niewykorzystanych bloków interfejsu Ethernet i analizatora stanów logicznych.
 Procesor VexRiscv został skonfigurowany z pamięcią podręczną danych wielkości 4 kibibajtów oraz z obsługą architektury RV32I - obecność pamięci podręcznej jest szczególnie ważna, gdyż to właśnie na jej potrzeby procesor zawiera wsparcie dla transferów potokowych na magistrali Wishbone.
-Z czterech pamięci SRAM dwa są w trybie tylko do odczytu - zawierać będą program rozruchowy oraz program testowy, które załadowane będą jako część bitstreamu dla układu FPGA.
+Z czterech pamięci SRAM dwa są w trybie tylko do odczytu --- zawierać będą program rozruchowy oraz program testowy, które załadowane będą jako część bitstreamu dla układu FPGA.
 
 \begin{figure}[H]
 	\centering
@@ -264,8 +264,8 @@ int main(void)
 \caption{\label{lst:benchmark-main.c}Główna funkcja programu testowego służącego do pomiaru prędkości transferu danych}
 \end{listing}
 
-Funkcje odpowiadające za przeprowadzenie testu są dostępne w ramach biblioteki libbase, będącej częścią frameworka LiteX - o ile funkcje można wywołać z poziomu konsoli programu rozruchowego, to program na etapie budowania zapisuje adres startowy oraz pojemność testowanej pamięci przekazany przez skrypt budujący układ platformy testowej, pozwalając na automatyczne wykonanie testu w momencie załadowania bitstreamu na układ FPGA lub uruchomienia symulatora.
-Dodatkową funkcjonalnością, dostępną w przypadku uruchomienia testu w symulacji, jest śledzenie wykonywania poprzez możliwość zapisywania flagi pod określonym wcześniej adresem - zawartość tego adresu jest potem zapisywana w pliku z przebiegami sygnałów emulowanego systemu, dzięki czemu można zbadać, jakie operacje na magistrali są wykonywane w danym fragmencie testu.
+Funkcje odpowiadające za przeprowadzenie testu są dostępne w ramach biblioteki libbase, będącej częścią systemu LiteX --- o ile funkcje można wywołać z poziomu konsoli programu rozruchowego, to program na etapie budowania zapisuje adres startowy oraz pojemność testowanej pamięci przekazany przez skrypt budujący układ platformy testowej, pozwalając na automatyczne wykonanie testu w momencie załadowania bitstreamu na układ FPGA lub uruchomienia symulatora.
+Dodatkową funkcjonalnością, dostępną w przypadku uruchomienia testu w symulacji, jest śledzenie wykonywania poprzez możliwość zapisywania flagi pod określonym wcześniej adresem --- zawartość tego adresu jest potem zapisywana w pliku z przebiegami sygnałów emulowanego systemu, dzięki czemu można zbadać, jakie operacje na magistrali są wykonywane w danym fragmencie testu.
 
 \begin{figure}[H]
 	\centering
@@ -276,11 +276,11 @@ Dodatkową funkcjonalnością, dostępną w przypadku uruchomienia testu w symul
 
 W celu skompilowania programu testowego użyty został kompilator GCC, skonfigurowany do emitowania kodu na platformę \texttt{riscv32-unknown-elf} - czyli 32-bitowego procesora RISC-V bez określonego systemu operacyjnego. Proces kompilacji, przedstawiony na rysunku \ref{fig:benchmark-program-pipeline}, jest opisany w pliku \texttt{Makefile}, który jest wywoływany przez skrypt budujący układ testowy. W czasie uruchamiania programu Make ustawiane są zmienne środowiskowe, które przechowują ścieżki do plików nagłówkowych definiujących adresy rejestrów w wygenerowanym układzie czy plik \texttt{crt0.s} dedykowany wybranemu głównemu procesorowi. Plik \texttt{crt0.s} przechowuje kod, którego zadaniem jest inicjalizacja pamięci programu przed przeskoczeniem do jego głównej procedury. Razem z kodem startowym i kodem programu testowego łączone są również biblioteki dostarczone przez system LiteX, wliczając w to standardową bibliotekę języka C.
 
-Skompilowany program zostaje zapisany w pliku ELF, który oprócz samego kodu przechowuje informacje o wymaganych obszarach pamięci czy platformie, dla której przeznaczony jest ten program. Informacje te nie są wykorzystywane przez dołączony do systemu LiteX program rozruchowy o nazwie BIOS, który został skompilowany w czasie budowania układu testowego - w tym celu z pliku ELF zostanie wyciągnięty fragment, który zawiera właściwy kod wykonywalny. Można tego dokonać z użyciem programu \texttt{objcopy}, który jest wywoływany automatycznie w skrypcie Makefile. Żeby BIOS jednak mógł załadować program testowy do głównej pamięci SRAM, na początku pliku musi być również informacja o rozmiarze kodu. Informacja zostaje dodana z użyciem skryptu \texttt{mkmscimg}, będącym jednym z narzędzi dostarczonym z systemem LiteX. Wynikowy plik z rozszerzeniem \texttt{.fbi} zostaje na koniec dodany jako zawartość aplikacyjnej pamięci ROM wygenerowanego układu.
+Skompilowany program zostaje zapisany w pliku ELF, który oprócz samego kodu przechowuje informacje o wymaganych obszarach pamięci czy platformie, dla której przeznaczony jest ten program. Informacje te nie są wykorzystywane przez dołączony do systemu LiteX program rozruchowy o nazwie BIOS, który został skompilowany w czasie budowania układu testowego --- w tym celu z pliku ELF zostanie wyciągnięty fragment, który zawiera właściwy kod wykonywalny. Można tego dokonać z użyciem programu \texttt{objcopy}, który jest wywoływany automatycznie w skrypcie Makefile. Żeby BIOS jednak mógł załadować program testowy do głównej pamięci SRAM, na początku pliku musi być również informacja o rozmiarze kodu. Informacja zostaje dodana z użyciem skryptu \texttt{mkmscimg}, będącym jednym z narzędzi dostarczonym z systemem LiteX. Wynikowy plik z rozszerzeniem \texttt{.fbi} zostaje na koniec dodany jako zawartość aplikacyjnej pamięci ROM wygenerowanego układu.
 
 \subsubsection{Wyniki testów wydajnościowych}
 
-Testy zostały wykonane kilkukrotnie, zaś ich wyniki uśrednione w celu otrzymania lepszej powtarzalności wyników w konkretnym środowisku.
+Testy zostały wykonane kilkukrotnie, ich wyniki zaś uśrednione w celu otrzymania lepszej powtarzalności wyników w konkretnym środowisku.
 
 Dla programu testowego uruchomionego w symulatorze Verilator na średniej klasy komputerze osobistym z symulowaną prędkością 1 MHz wyniki prezentują się następująco:
 
@@ -290,8 +290,8 @@ Dla programu testowego uruchomionego w symulatorze Verilator na średniej klasy 
 \begin{tabular}{ r|l|l|l| }
   & prędkość bazowa & prędkość po zmianach & różnica względem prędkości bazowej\\
  \hline
- zapis & 1.6 MiB/s & 1.6 MiB/s & 100.0 \%\\
- odczyt & 918.3 KiB/s & 1.1 MiB/s & 123.6 \%\\
+ zapis & 1.6 MiB/s & 1.6 MiB/s & 100.0\%\\
+ odczyt & 918.3 KiB/s & 1.1 MiB/s & 123.6\%\\
  \hline
 \end{tabular}
 \caption{\label{tab:benchmark-seq-sim}Wyniki pomiaru prędkości operacji sekwencyjnych na symulowanej platformie testowej}
@@ -301,8 +301,8 @@ Dla programu testowego uruchomionego w symulatorze Verilator na średniej klasy 
 \begin{tabular}{ r|l|l|l| }
   & prędkość bazowa & prędkość po zmianach & różnica względem prędkości bazowej\\
  \hline
- zapis & 1.6 MiB/s & 1.6 MiB/s & 100.0 \%\\
- odczyt & 122.7 KiB/s & 154.8 KiB/s & 126.2 \%\\
+ zapis & 1.6 MiB/s & 1.6 MiB/s & 100.0\%\\
+ odczyt & 122.7 KiB/s & 154.8 KiB/s & 126.2\%\\
  \hline
 \end{tabular}
 \caption{\label{tab:benchmark-rnd-sim}Wyniki pomiaru prędkości operacji losowych na symulowanej platformie testowej}
@@ -317,8 +317,8 @@ Ten sam program uruchomiony na platformie zrealizowanej z wykorzystaniem układu
 \begin{tabular}{ r|l|l|l| }
   & prędkość bazowa & prędkość po zmianach & różnica względem prędkości bazowej\\
  \hline
- zapis & 166.6 MiB/s & 1.6 MiB/s & 100.0 \%\\
- odczyt & 87.2 MiB/s & 110.4 MiB/s & 126.6 \%\\
+ zapis & 166.6 MiB/s & 1.6 MiB/s & 100.0\%\\
+ odczyt & 87.2 MiB/s & 110.4 MiB/s & 126.6\%\\
  \hline
 \end{tabular}
 \end{center}
@@ -330,8 +330,8 @@ Ten sam program uruchomiony na platformie zrealizowanej z wykorzystaniem układu
 \begin{tabular}{ r|l|l|l| }
   & prędkość bazowa & prędkość po zmianach & różnica względem prędkości bazowej\\
  \hline
- zapis & 166.6 MiB/s & 166.7 MiB/s & 100.0 \%\\
- odczyt & 11.6 MiB/s & 14.7 MiB/s & 126.6 \%\\
+ zapis & 166.6 MiB/s & 166.7 MiB/s & 100.0\%\\
+ odczyt & 11.6 MiB/s & 14.7 MiB/s & 126.6\%\\
  \hline
 \end{tabular}
 \end{center}
@@ -340,8 +340,8 @@ Ten sam program uruchomiony na platformie zrealizowanej z wykorzystaniem układu
 
 Na podstawie wyników można zauważyć, iż prędkość odczytu z pamięci wzrosła o 23 do 26 punktów procentowych względem prędkości platformy bez obsługi transferów potokowych. Oznacza to, iż wdrożone modyfikacje przyspieszyły odczyt danych w znaczącym stopniu bez konieczności przyspieszenia taktowania całego układu.
 
-Brak zmian w prędkości zapisu można wytłumaczyć tym, iż procesor wykonywuje kilka operacji, zanim pojedyncze słowo będzie gotowe do zapisania w pamięci - tym samym transfery potokowe nie zachodzą, gdyż nie jest możliwym przygotowanie nowych słów w każdym kolejnym takcie zegara.
-Podobnie można wytłumaczyć również zmianę w prędkości odczytu - procesor w jednym cyklu potokowym odczytuje tyle słów, ile można zmieścić w pojedynczej linii pamięci podręcznej - dzięki temu procesor szybciej może pobrać dane z kilku sąsiadujących adresów. Przy bardziej odległych od siebie adresach procesor musi jednak ponownie pobrać dane bezpośrednio z pamięci RAM, gdyż nie zostały one załadowane do pamięci podręcznej przy poprzedniej operacji odczytu potokowego.
+Brak zmian w prędkości zapisu można wytłumaczyć tym, iż procesor wykonywuje kilka operacji, zanim pojedyncze słowo będzie gotowe do zapisania w pamięci --- tym samym transfery potokowe nie zachodzą, gdyż nie jest możliwym przygotowanie nowych słów w każdym kolejnym takcie zegara.
+Podobnie można wytłumaczyć również zmianę w prędkości odczytu --- procesor w jednym cyklu potokowym odczytuje tyle słów, ile można zmieścić w pojedynczej linii pamięci podręcznej. Dzięki temu procesor szybciej może pobrać dane z kilku sąsiadujących adresów. Przy bardziej odległych od siebie adresach procesor musi jednak ponownie pobrać dane bezpośrednio z pamięci RAM, gdyż nie zostały one załadowane do pamięci podręcznej przy poprzedniej operacji odczytu potokowego.
 
 \subsection{Wnioski po realizacji testów}
 

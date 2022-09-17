@@ -4,7 +4,7 @@
 
 O ile układ SoC można zaprojektować w całości od podstaw, częstą praktyką jest wykorzystywanie gotowych komponentów, często napisanych przez zewnętrznych dostawców, w celu szybszego zaprojektowania układu spełniającego założenia projektowe.
 
-LiteX\cite{https://doi.org/10.48550/arxiv.2005.02506} jest zbiorem narzędzi oraz komponentów, pozwalający na zbudowanie zarówno kompletnego układu SoC jak i bardziej specjalizowanych systemów w formie syntezowalnej logiki. W tym celu wykorzystuje bibliotekę Migen\cite{migen:2016:Online}, która implementuje język opisu sprzętu w formie obiektów w języku Python\cite{10.5555/1593511}. Dzięki temu możliwe jest opisanie logiki wykorzystując popularny język programowania wykorzystujący znajomą składnię, co zmniejsza barierę wejścia; oprócz tego można wykorzystać narzędzia z ekosystemu języka Python, dzięki czemu dostępne są między innymi większe możliwości parametryzacji logiki czy systemy do przeprowadzania testów automatycznych. Jednocześnie możliwe jest łączenie logiki napisanej w innych językach, co ułatwia wykorzystywanie komponentów spoza zestawu LiteX.
+LiteX\cite{https://doi.org/10.48550/arxiv.2005.02506} jest zbiorem narzędzi oraz komponentów, pozwalający na zbudowanie zarówno kompletnego układu SoC, jak i bardziej specjalizowanych systemów w formie syntezowalnej logiki. W tym celu wykorzystuje bibliotekę Migen\cite{migen:2016:Online}, która implementuje język opisu sprzętu w formie obiektów w języku Python\cite{10.5555/1593511}. Dzięki temu możliwe jest opisanie logiki z wykorzystaniem jednego z popularnych języków programowania, co zmniejsza barierę wejścia; oprócz tego można wykorzystać narzędzia z ekosystemu języka Python, dzięki czemu dostępne są między innymi większe możliwości parametryzacji logiki czy systemy do przeprowadzania testów automatycznych. Jednocześnie możliwe jest łączenie logiki napisanej w innych językach, co ułatwia wykorzystywanie komponentów spoza zestawu LiteX.
 
 \begin{figure}[H]
 \centering
@@ -13,13 +13,13 @@ LiteX\cite{https://doi.org/10.48550/arxiv.2005.02506} jest zbiorem narzędzi ora
 \label{fig:litex-project-schem}
 \end{figure}
 
-Na rysunku \ref{fig:litex-project-schem} przedstawiona została struktura projektu układu logicznego zbudowanego z wykorzystaniem systemu LiteX. Elementy takie, jak generowanie skryptów budujących układ logiczny czy podstawowe peryferia wejścia/wyjścia są integralną częścią tego systemu, co pozwala użytkownikowi skupić się na tworzeniu samego układu. Główną część układu, definiującą między innymi połączenia między komponentami oraz sygnały wejścia/wyjścia, opisuje się w języku Python z użyciem biblioteki Migen. Opis ten na etapie budowania, łącznie z dodatkowymi modułami wykorzystującymi bibliotekę Migen, jest przetwarzany następnie do formy kodu opisu sprzętu w języku Verilog. Możliwym jest też dodanie komponentów zaimplementowanych w językach Verilog oraz VHDL - w tym wypadku źródła nie są przetwarzane, tylko są przekazywane bezpośrednio do skryptu budującego. Skrypt budujący, w zależności od opisu platformy docelowej, może zbudować projekt do formy pliku binarnego dla układu FPGA z użyciem dedykowanych narzędzi lub zbudować program symulatora, który można uruchomić na komputerze osobistym.
+Na rysunku \ref{fig:litex-project-schem} przedstawiona została struktura projektu układu logicznego zbudowanego z wykorzystaniem systemu LiteX. Elementy takie, jak generowanie skryptów budujących układ logiczny czy podstawowe peryferia wejścia/wyjścia są integralną częścią tego systemu, co pozwala użytkownikowi skupić się na tworzeniu samego układu. Główną część układu, definiującą między innymi połączenia między komponentami oraz sygnały wejścia/wyjścia, opisuje się w języku Python z użyciem biblioteki Migen. Opis ten na etapie budowania, łącznie z dodatkowymi modułami wykorzystującymi bibliotekę Migen, jest przetwarzany następnie do formy kodu opisu sprzętu w języku Verilog. Możliwym jest też dodanie komponentów zaimplementowanych w językach Verilog oraz VHDL --- w tym wypadku źródła nie są przetwarzane, tylko są przekazywane bezpośrednio do skryptu budującego. Skrypt budujący, w zależności od opisu platformy docelowej, może zbudować projekt do formy pliku binarnego dla układu FPGA z użyciem dedykowanych narzędzi lub zbudować program symulatora, który można uruchomić na komputerze osobistym.
 
 LiteX został wybrany jako podstawa tego projektu ze względu na dużą popularność tego systemu w otwarto-źródłowych projektach wykorzystujących układy FPGA oraz z powodu doświadczenia autora niniejszej pracy nabytej poprzez wykorzystanie go w swoich poprzednich projektach.
 
 \subsection{Symulowanie układu z użyciem LiteX i Verilator}
 
-LiteX zawiera modularne środowisko symulacji, które pozwala na symulację zaprojektowanego układu na podstawie opisanej w języku Migen logiki oraz parametrów dotyczących środowiska zewnętrznego. Możliwe jest dzięki temu przetestowanie układu oraz przeznaczonego na nie oprogramowania, przykładowo poprzez wykorzystanie wirtualnego interfejsu Ethernet do komunikacji. Ułatwia to usuwanie błędów z projektu układu jak i oprogramowania, zanim jeszcze układ zostanie zsyntetyzowany do formy bitstreamu dla układu FPGA na potrzeby dalszych testów.
+LiteX zawiera modularne środowisko symulacji, które pozwala na symulację zaprojektowanego układu na podstawie opisanej w języku Migen logiki oraz parametrów dotyczących środowiska zewnętrznego. Możliwe jest dzięki temu przetestowanie układu oraz przeznaczonego na nie oprogramowania, przykładowo poprzez wykorzystanie wirtualnego interfejsu Ethernet do komunikacji. Ułatwia to usuwanie błędów z projektu układu, jak i oprogramowania, zanim jeszcze układ zostanie zsyntetyzowany do formy bitstreamu dla układu FPGA na potrzeby dalszych testów.
 
 \begin{listing}[H]
 \begin{minted}{python}
@@ -45,7 +45,7 @@ class SimSoC(TestSoC):
 \caption{\label{lst:tooling-litex-sim-soc}Klasa SimSoC opisująca układ w formie przeznaczonej do symulacji}
 \end{listing}
 
-W celu uruchomienia naszego systemu w symulatorze, układ musi być skonfigurowany do zbudowania z użyciem narzędzi symulacyjnych zamiast narzędziami syntezy dedykowanych konkretnemu układowi FPGA. W tym celu LiteX integruje obsługę programu Verilator\cite{verilator:2016:Online} w celu konwersji układu do kodu komputerowego w formie źródłowej. Ów program linkowany jest z tak zwanym "wrapperem", który łączy naszą logikę z dodatkowymi modułami, które symulują wybrane peryferia z użyciem zasobów systemu operacyjnego, na którym symulacja będzie wykonywana. W przypadku tego projektu będzie to interfejs szeregowy UART dostępny w formie standardowego strumienia wejścia/wyjścia oraz niewykorzystany interfejs Ethernet w formie wirtualnego interfejsu sieciowego w systemie hosta. W ten sposób symulacja układu nie różni się znacząco od wykonywania programu komputerowego, co ułatwia interakcję z programem wykonywanym w wirtualnym środowisku.
+W celu uruchomienia naszego systemu w symulatorze układ musi zostać przetworzony do formy kodu programu komputerowego. W tym celu LiteX integruje obsługę programu Verilator\cite{verilator:2016:Online} w celu konwersji układu do kodu komputerowego w formie źródłowej. Ów program łączony jest z dodatkowymi modułami, które łączą naszą logikę z dodatkowymi modułami; pozwalają one na symulację wybranych peryferiów z użyciem zasobów systemu operacyjnego. W przypadku tego projektu będzie to interfejs szeregowy UART dostępny w formie standardowego strumienia wejścia/wyjścia oraz niewykorzystany interfejs Ethernet w formie wirtualnego interfejsu sieciowego w systemie hosta. W ten sposób symulacja układu nie różni się znacząco od wykonywania programu komputerowego, co ułatwia interakcję z programem wykonywanym w wirtualnym środowisku.
 
 \begin{listing}[H]
 \begin{minted}{python}
@@ -70,9 +70,9 @@ W praktyce zbudowanie symulatora układu polega na podmianie wybranych peryferi�
 
 \subsection{Testowanie logiki z użyciem biblioteki cocotb}
 
-Standardową praktyką przy testowaniu układów logicznych jest pisanie tak zwanych test benchy, czyli skryptów wykorzystywanych do testowania logiki poprzez sterowanie sygnałami wejściowymi oraz porównywanie stanu sygnałów wyjściowych z oczekiwanymi wzorcami. Owe skrypty są zwykle pisane w tym samym języku, co testowany układ logiczny.
+Standardową praktyką przy testowaniu układów logicznych jest pisanie skryptów testowych (z j. ang. \texttt{testbench}), wykorzystywanych do testowania logiki poprzez sterowanie sygnałami wejściowymi oraz porównywanie stanu sygnałów wyjściowych z oczekiwanymi wzorcami. Owe skrypty są zwykle pisane w tym samym języku, co testowany układ logiczny.
 
-Ze względu na wykorzystywanie języka Python w tej pracy do zaprojektowania układu SoC, dobrym pomysłem jest użycie go również w celu testowania logiki. W tym celu wykorzystana została biblioteka cocotb\cite{cocotb:2022:Online}, która pozwala na testowanie projektów zaimplementowanych w językach Verilog i VHDL z użyciem skryptów napisanych w języku Python. Cocotb współpracuje z zarówno komercyjnymi jak i otwarto-źródłowymi symulatorami, dzięki czemu można tą bibliotekę wykorzystać w istniejących już środowiskach do projektowania układów logicznych.
+Ze względu na wykorzystywanie języka Python w tej pracy do zaprojektowania układu SoC, dobrym pomysłem jest użycie go również w celu testowania logiki. W tym celu wykorzystana została biblioteka cocotb\cite{cocotb:2022:Online}, która pozwala na testowanie projektów zaimplementowanych w językach Verilog i VHDL z użyciem skryptów napisanych w języku Python. Cocotb współpracuje z zarówno komercyjnymi, jak i otwarto-źródłowymi symulatorami, dzięki czemu można tę bibliotekę wykorzystać w istniejących już środowiskach do projektowania układów logicznych.
 
 \begin{listing}[H]
 \begin{minted}{python}
@@ -98,7 +98,7 @@ async def test_blink(dut):
 \caption{\label{lst:tooling-sampletest}Fragment testu w języku Python realizującego operację odczytu wybranej ilości słów poprzez magistralę Wishbone}
 \end{listing}
 
-Jako, że ręczne wykonywanie transmisji na magistrali Wishbone oraz interpretowanie ich wyników będzie często powtarzaną operacją, w zamian użyta została biblioteka cocotbext-wishbone\cite{cocotbext-wishbone:2022:Online}, która udostępnia dwa obiekty: monitora oraz sterownika. Sterownik odpowiada stronie inicjującej transfer na magistrali, zaś monitor obsługuje transfery w sposób identyczny do peryferiów, w stronę których transfery są wykonywane.
+Jako że ręczne wykonywanie transmisji na magistrali Wishbone oraz interpretowanie ich wyników będzie często powtarzaną operacją, w zamian użyta została biblioteka cocotbext-wishbone\cite{cocotbext-wishbone:2022:Online}, która udostępnia dwa obiekty: monitora oraz sterownika. Sterownik odpowiada stronie inicjującej transfer na magistrali, natomiast monitor obsługuje transfery w ten sam sposób, co peryferium nasłuchujące na magistrali.
 
 \begin{listing}[H]
 \begin{minted}{python}
@@ -120,7 +120,7 @@ Wspomniana biblioteka cocotbext-wishbone została rozbudowana o przekazywanie i 
 
 \subsection{Wnioski związane z doborem narzędzi}
 
-Dzięki wykorzystaniu komponentów i narzędzi udostępnionych na wolnych i otwartych licencjach, możliwym jest realizacja kompletnego systemu jednoukładowego oraz jego testowanie niższym nakładem finansowym, niż wykorzystując komercyjne rozwiązania, które z powodu wysokiej ceny mogą być nieosiągalne dla małych firm i hobbystów.
+Dzięki wykorzystaniu komponentów i narzędzi, udostępnionych na wolnych i otwartych licencjach, możliwym jest realizacja kompletnego systemu jednoukładowego oraz jego testowanie niższym nakładem finansowym, niż wykorzystując komercyjne rozwiązania, które z powodu wysokiej ceny mogą być nieosiągalne dla małych firm i hobbystów.
 Dodatkową zaletą jest możliwość łatwiejszej wymiany wiedzy oraz wprowadzania do nich modyfikacji, które mogą zostać wykorzystane przez osoby i firmy trzecie.
 Z drugiej strony narzędzia komercyjne stosowane przy projektowaniu systemów jednoukładowych potrafią być, z powodu często dłuższej obecności na rynku, lepiej udokumentowane oraz bardziej znane przez osoby je wykorzystujące do projektów tychże systemów.
 
