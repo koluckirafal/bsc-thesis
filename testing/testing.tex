@@ -1,7 +1,7 @@
 \section{Realizacja testów i analiza ich wyników}
 
 Po zmodyfikowaniu podzespołu należy sprawdzić, czy oryginalna funkcjonalność nie została w jakiś sposób naruszona oraz czy dodana funkcjonalność działa zgodnie z założeniami. W tym celu podzespół należy poddać procesowi weryfikacji. Można jej dokonać na różne sposoby, zaczynając od testów jednostkowych i integracyjnych, kończąc zaś na weryfikacji formalnej.
-Weryfikacja formalna jest dokładniejsza ze względu na wykorzystywanie formalnych metod matematycznych. Jednocześnie narzędzia, które wykorzystują tą metodę weryfikacji, są mało popularne i mogą nie być udokumentowane w wystarczającym stopniu. Wobec tego zostanie wykorzystana prostsza metoda testów jednostkowych - polega ona na opisaniu sekwencji sygnałów wejściowych testowanego komponentu oraz instrukcji pozwalających na interpretację stanów wyjściowych poprzez porównywanie ich do oczekiwanych wzorców.
+Weryfikacja formalna jest dokładniejsza ze względu na wykorzystywanie formalnych metod matematycznych. Jednocześnie narzędzia, które wykorzystują tę metodę weryfikacji, są mało popularne i mogą nie być udokumentowane w wystarczającym stopniu. Wobec tego zostanie wykorzystana prostsza metoda testów jednostkowych - polega ona na opisaniu sekwencji sygnałów wejściowych testowanego komponentu oraz instrukcji pozwalających na interpretację stanów wyjściowych poprzez porównywanie ich do oczekiwanych wzorców.
 Testy jednostkowe są często używane przy tworzeniu nowoczesnego oprogramowania komputerowego, przez co narzędzia wykorzystywane w tym procesie są dobrze udokumentowane.
 
 \subsection{Analiza i porównanie przebiegów aktywności magistrali}
@@ -21,7 +21,7 @@ Oprócz tego wykorzystane zostały biblioteki cocotb-test\cite{cocotb-test} oraz
     \label{fig:testing-pipeline}
 \end{figure}
 
-Testowane peryferia, czyli pamięć SRAM oraz transceiver FIFO, zostały zainstancjonowane w minimalnym module LiteX, który na zewnątrz udostępnia wspólną magistralę Wishbone, drugi port pamięci SRAM, wyjście nadawczej kolejki FIFO oraz wejście odbiorczej kolejki FIFO. W ten sposób mamy dostęp do wszystkich sygnałów, które posłużą do wysterowania magistrali oraz komunikacji z peryferiami inną drogą, umożliwiając obserwowanie wpływu implementacji interfejsu Wishbone na komunikację z peryferiami. Jako że biblioteka Cocotb oczekuje opisu układu w języku Verilog, moduł LiteX jest eksportowany do pliku Verilog przed rozpoczęciem wykonywania testów.
+Testowane peryferia, czyli pamięć SRAM oraz moduł transmisyjny, zostały zainstancjonowane w minimalnym module LiteX, który na zewnątrz udostępnia wspólną magistralę Wishbone, drugi port pamięci SRAM, wyjście nadawczej kolejki FIFO (First In, First Out) oraz wejście odbiorczej kolejki FIFO. W ten sposób mamy dostęp do wszystkich sygnałów, które posłużą do wysterowania magistrali oraz komunikacji z peryferiami inną drogą, umożliwiając obserwowanie wpływu implementacji interfejsu Wishbone na komunikację z peryferiami. Dzięki bezpośredniemu dostępowi do badanych peryferiów, z wykorzystaniem dodatkowych sygnałów (przykładowo drugi port pamięci RAM), możliwym było również wstępne zapisanie danych testowych do peryferiów oraz odczytanie wynikowych danych w celu sprawdzenia poprawności transferu danych. Jako, że biblioteka Cocotb oczekuje opisu układu w języku Verilog, moduł LiteX jest przetwarzany do formy kodu w języku Verilog przed rozpoczęciem wykonywania testów.
 
 \begin{longlisting}
 \begin{minted}{python}
@@ -138,15 +138,75 @@ async def test_read(dut):
 
 \subsubsection{Porównanie wyników testów}
 
-\todo[inline]{DIAGRAM: WAŻNE: Przebiegi dla każdego rodzaju peryferiów i każdego rodzaju cykli}
+Na podstawie przebiegów wygenerowanych w trakcie wykonywania testów zauważyć można kilka różnic, które wpływają na wydajność transferów danych. Pierwszym z nich jest mniejsza ilość cykli zegarowych, w trakcie których przesłana została określona ilość słów po magistrali.
+Na rysunkach \ref{fig:test-fifo-classic-8} oraz \ref{fig:test-fifo-constant-8} przedstawione zostały przebiegi dla dwóch testów: zapisu ośmiu losowych, 32-bitowych słów z użyciem klasycznego cyklu oraz cyklu potokowego ze stałym adresem. Główną różnicą między tymi przebiegami jest fakt, że w cyklu potokowym każde kolejne słowo było przekazywane w ciągu jednego cyklu zegara. Jest to spowodowane tym, iż ze względu na brak dodatkowych opóźnień moduł transmisyjny był w stanie obsłużyć transfer w każdym cyklu zegara, o czym informował utrzymywany w stanie wysokim sygnał \texttt{ACK}. Strona inicjująca połączenie również nie wymagała dodatkowych opóźnień przy transferze, co było sygnalizowane sygnałem \texttt{STB} będącym w stanie wysokim przez cały czas transmisji.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=1,trim={2.54cm 14cm 12.3cm 2.9cm},clip]{testing/test-fifo-classic-8.pdf}
+	\caption{Przebieg transferu danych do peryferium transmisyjnego w klasycznym cyklu magistrali Wishbone}
+	\label{fig:test-fifo-classic-8}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=1,trim={2.54cm 14cm 11.1cm 2.9cm},clip]{testing/test-fifo-constant-8.pdf}
+	\caption{Przebieg transferu danych do peryferium transmisyjnego w cyklu potokowym ze stałym adresem magistrali Wishbone}
+	\label{fig:test-fifo-constant-8}
+\end{figure}
+
+W celu sprawdzenia poprawności transmisji dane zostaną odebrane z kolejki transmisyjnej poprzez zewnętrzne sygnały modułu FIFO. W tym celu zostały porównane odebrane słowa, przedstawione na przebiegu z rysunku \ref{fig:test-fifo-valid-8}, ze słowami zapisywanymi na przebiegu z rysunku \label{fig:test-fifo-constant-8}. Ich wartości oraz kolejność są identyczne, co pozwala stwierdzić, że dane zostały przetransferowane w nienaruszonym stanie poprzez interfejs magistrali modułu oraz że jego część nadawcza, czyli kolejka FIFO działa poprawnie.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=1,trim={2.54cm 17cm 13.3cm 2.9cm},clip]{testing/test-fifo-valid-8.pdf}
+	\caption{Przebieg przedstawiający odczyt danych z kolejki nadawczej FIFO z użyciem sygnałów zewnętrznych}
+	\label{fig:test-fifo-valid-8}
+\end{figure}
+
+Tą samą różnicę w prędkości transmisji zauważyć można również na przebiegach przedstawiających transfer danych z użyciem cykli potokowych z inkrementacją adresu. Na przebiegach z rysunków \ref{fig:test-sram-classic-8} oraz \ref{fig:test-sram-increment-8}, przedstawione zostały cykle odczytu ośmiu słów do pamięci SRAM, która poprzednio została zapełniona wygenerowanymi losowo danymi.
+Widoczna jest identyczna różnica jak w poprzednio porównanych przebiegach, czyli transfer drugiego słowa i kolejnych zachodzący w czasie krótszym przy zastosowaniu transferu potokowego.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=1,trim={2.54cm 14cm 13.4cm 2.9cm},clip]{testing/test-sram-classic-8.pdf}
+	\caption{Przebieg odczytu danych z pamięci SRAM w klasycznym cyklu magistrali Wishbone}
+	\label{fig:test-sram-classic-8}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=1,trim={2.54cm 14cm 11.2cm 2.9cm},clip]{testing/test-sram-increment-8.pdf}
+	\caption{Przebieg odczytu danych z pamięci SRAM w cyklu potokowym z inkrementacją adresu magistrali Wishbone}
+	\label{fig:test-sram-increment-8}
+\end{figure}
+
+Poprawność zapisanych danych została sprawdzona poprzez porównanie danych odczytanych poprzez magistralę ze zbiorem danych, które poprzednio zostały załadowane do pamięci z wykorzystaniem zewnętrznego portu. W przypadku cykli z inkrementacją adresu należy również sprawdzić, czy dane słowo zostało zachowane i odczytane w tym samym miejscu w pamięci, ze względu na inne zachowanie licznika adresu w interfejsie modułu SRAM przy inkrementacji adresu z użytym zawijaniem jego najmniej znaczących bitów. Z tego powodu testy wykorzystują dodatkowy parametr, który określa wartość dodaną do początkowego adresu, od którego zaczną się operacje na magistrali.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=1,trim={2.54cm 16.2cm 12.3cm 2.9cm},clip]{testing/test-sram-valid-8-2.pdf}
+	\caption{Przebieg zapisu testowych danych do pamięci SRAM z wykorzystaniem drugiego portu}
+	\label{fig:test-sram-valid-8}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=1,trim={2.54cm 14cm 11.3cm 2.9cm},clip]{testing/test-sram-wrapped-8-2.pdf}
+	\caption{Przebieg odczytu danych z pamięci SRAM w cyklu potokowym z zawijaną inkrementacją adresu}
+	\label{fig:test-sram-wrapped-8}
+\end{figure}
+
+Na przebiegu z rysunku \ref{fig:test-sram-wrapped-8} przedstawiony został odczyt ośmiu słów z parametrem \texttt{BTE} równym \texttt{0b01}. Wartość ta oznacza, że zawinięcie adresu obejmuje granicę czterech sąsiadujących ze sobą adresów. Odczyt danych poprzez magistralę rozpoczął się od adresu \texttt{0x002}. Po odczytaniu słowa z adresu \texttt{0x003}, kolejne operacje następują na adresach \texttt{0x000}, \texttt{0x001} oraz \texttt{0x006}. Można zauważyć, że dwa najmniej znaczące bity adresów \texttt{0x002} i \texttt{0x006} są identyczne, co pokrywa się z założeniami mechanizmu zawiniętej inkrementacji adresu.
+Po posortowaniu zapisanych i odebranych danych po ich adresach widocznym jest to, że są one identyczne. Oznacza to, iż dane zostały odczytane z tych samych adresów w pamięci SRAM, pod którymi zostały uprzednio zapisane w innej kolejności (zademonstrowane na przebiegu z rysunku \ref{fig:test-sram-valid-8}).
 
 \subsection{Testy wydajnościowe systemu jednoukładowego na symulatorze oraz na układzie FPGA}
 
-Po zweryfikowaniu poprawności działania peryferiów kolejnym etapem jest przeprowadzenie testów wydajnościowych. Polegać one będą na wykonaniu testowego układu SoC, który zawierać będzie peryferium w wariancie zarówno zmodyfikowanym jak i oryginalnym. Na tym układzie uruchamiany będzie program, który będzie mierzyć prędkość operacji odczytu i zapisu zbioru danych w kolejności sekwencyjnej i losowej. Pozwoli to na zbadanie wpływu obsługi transferów potokowych na szybkość wykonywania operacji.
+Po zweryfikowaniu poprawności działania peryferiów kolejnym etapem jest przeprowadzenie testów wydajnościowych. Polegać one będą na wykonaniu testowego układu SoC, który zawierać będzie peryferium w wariancie zarówno zmodyfikowanym, jak i oryginalnym. Na tym układzie uruchamiany będzie program, który będzie mierzyć prędkość operacji odczytu i zapisu zbioru danych w kolejności sekwencyjnej i losowej. Pozwoli to na zbadanie wpływu obsługi transferów potokowych na szybkość wykonywania operacji.
 
 \subsubsection{Wykorzystane urządzenia}
 
-Testy wydajnościowe były wykonywane w dwóch środowiskach: na przedstawionym na zdjęciu \ref{fig:arty-a7-photo} zestawie deweloperskim Digilent Arty A7-35\cite{digilent-arty-a7}, zawierającym układ programowalnych bramek logicznych Artix-7 firmy Xilinx, oraz na symulatorze uruchomionym na średniej klasy komputerze klasy PC będącym pod kontrolą systemu operacyjnego Debian GNU/Linux\cite{debian11}. Symulator został automatycznie zbudowany poprzez framework LiteX z użyciem programu Verilator, zaś plik konfigurujący zachowanie układu FPGA (zwany bitstreamem) zbudowany został z wykorzystaniem zbioru narzędzi do syntezy Vivado\cite{vivado2019.1} firmy Xilinx oraz, na potrzeby testowania kompatybilności, zestawu narzędzi F4PGA\cite{f4pga}.
+Testy wydajnościowe były wykonywane w dwóch środowiskach: na przedstawionym na zdjęciu \ref{fig:arty-a7-photo} zestawie deweloperskim Digilent Arty A7-35\cite{digilent-arty-a7}, zawierającym układ programowalnych bramek logicznych Artix-7 firmy Xilinx, oraz na symulatorze uruchomionym na średniej klasy komputerze klasy PC będącym pod kontrolą systemu operacyjnego Debian GNU/Linux\cite{debian11}. Symulator został automatycznie zbudowany poprzez system LiteX z użyciem programu Verilator, zaś plik konfigurujący zachowanie układu FPGA (zwany bitstreamem) zbudowany został z wykorzystaniem zbioru narzędzi do syntezy Vivado\cite{vivado2019.1} firmy Xilinx oraz, na potrzeby testowania kompatybilności, zestawu narzędzi F4PGA\cite{f4pga}.
 
 \begin{figure}[H]
 	\centering
