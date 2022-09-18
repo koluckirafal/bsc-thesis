@@ -232,7 +232,7 @@ Z czterech pamięci SRAM dwa są w trybie tylko do odczytu --- zawierać będą 
 
 Program testowy, zaimplementowany w języku C, testuje wybrany obszar pamięci poprzez zapisanie oraz odczytanie całego obszaru. Test ten jest wykonywany na dwa sposoby: dokonując operacji na kolejnych oraz losowych adresach.
 
-\begin{listing}[H]
+\begin{longlisting}
 \begin{minted}{c}
 int main(void)
 {
@@ -262,7 +262,7 @@ int main(void)
 }
 \end{minted}
 \caption{\label{lst:benchmark-main.c}Główna funkcja programu testowego służącego do pomiaru prędkości transferu danych}
-\end{listing}
+\end{longlisting}
 
 Funkcje odpowiadające za przeprowadzenie testu są dostępne w ramach biblioteki libbase, będącej częścią systemu LiteX --- o ile funkcje można wywołać z poziomu konsoli programu rozruchowego, to program na etapie budowania zapisuje adres startowy oraz pojemność testowanej pamięci przekazany przez skrypt budujący układ platformy testowej, pozwalając na automatyczne wykonanie testu w momencie załadowania bitstreamu na układ FPGA lub uruchomienia symulatora.
 Dodatkową funkcjonalnością, dostępną w przypadku uruchomienia testu w symulacji, jest śledzenie wykonywania poprzez możliwość zapisywania flagi pod określonym wcześniej adresem --- zawartość tego adresu jest potem zapisywana w pliku z przebiegami sygnałów emulowanego systemu, dzięki czemu można zbadać, jakie operacje na magistrali są wykonywane w danym fragmencie testu.

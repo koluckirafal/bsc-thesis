@@ -152,7 +152,7 @@ Strona inicjująca połączenie informuje o rodzaju cyklu poprzez sygnał \textt
 Z dwóch zdefiniowanych w specyfikacji rodzajów cykli potokowych, ze stałym adresem oraz inkrementacją adresu, w przypadku pamięci RAM interesuje nas cykl potokowy z inkrementacją adresu. W tym celu wykorzystamy warunek kombinacyjny, który w wypadku wystąpienia wspieranego rodzaju cyklu sygnalizuje żądanie transferu potokowego.
 Oprócz tego definiujemy wektor \texttt{adr_counter_base}, w którym będzie zawarty adres bazowy z wyłączeniem bitów, które będą wykorzystywane w przypadku inkrementacji adresu z zapętleniem najmniej znaczących bitów.
 
-\begin{listing}[H]
+\begin{longlisting}
 \begin{minted}{python}
 class SRAM(Module):
     def __init__(self, mem_or_size, read_only=None, init=None, bus=None, burst=True):
@@ -173,7 +173,7 @@ class SRAM(Module):
 \end{minted}
 \caption{Logika kombinacyjna generująca sygnał informujący o cyklu potokowym na podstawie sygnału \texttt{CTI}}
 \label{lst:impl-sram-detect}
-\end{listing}
+\end{longlisting}
 
 \subsubsection{Generator sekwencji adresów}
 
@@ -242,7 +242,7 @@ Gdy inicjator cyklu informuje o zakończeniu transferu potokowego poprzez ustawi
 
 W części kombinacyjnej generatora następny adres jest wyznaczany poprzez zsumowanie dwóch sygnałów, gdzie jeden sygnał zawiera wartość licznika bez zawijanych bitów adresu, natomiast drugi sygnał zawiera dolne bity adresu wyznaczone poprzez zsumowanie zawartości licznika i rejestru zawierającego dolne bity adresu początkowego, z których wykorzystywane są wyłącznie zawinięte bity.
 
-\begin{listing}[H]
+\begin{longlisting}
 \begin{minted}{python}
 class SRAM(Module):
     def __init__(self, mem_or_size, read_only=None, init=None, bus=None, burst=True):
@@ -261,7 +261,7 @@ class SRAM(Module):
 \end{minted}
 \caption{Logika kombinacyjna odpowiedzialna za sumowanie docelowego adresu w każdym cyklu zegara}
 \label{lst:impl-sram-adrnext}
-\end{listing}
+\end{longlisting}
 
 Wyznaczany adres, jeśli licznik jest uruchomiony, jest przekazywany w logice kombinacyjnej do linii adresowej modułu pamięci RAM --- w przeciwnym wypadku adres do pamięci RAM jest przekazywany bezpośrednio z magistrali, wliczając pierwszy adres przy transferach potokowych.
 
@@ -269,7 +269,7 @@ Wyznaczany adres, jeśli licznik jest uruchomiony, jest przekazywany w logice ko
 
 Logika synchroniczna odpowiedzialna za generowanie sygnału \texttt{ACK} została zmodyfikowana w nieznaczny sposób, poprzez dodanie warunku OR dla zanegowanego sygnału \texttt{ACK} z poprzedniego taktu oraz wewnętrznego sygnału informującego o aktywnym transferze potokowym. W ten sposób sygnał \texttt{ACK} jest aktywny w każdym takcie zegara przy transferach potokowych, przy klasycznych cyklach zaś zachowanie jest to samo co poprzednio, czyli sygnał \texttt{ACK} jest natychmiastowo negowany w drugim takcie zegara po rozpoczęciu transferu.
 
-\begin{listing}[H]
+\begin{longlisting}
 \begin{minted}{python}
 class SRAM(Module):
     def __init__(self, mem_or_size, read_only=None, init=None, bus=None, burst=True):
@@ -283,7 +283,7 @@ class SRAM(Module):
 \end{minted}
 \caption{Fragment logiki synchronicznej generującej sygnał ACK}
 \label{lst:impl-sram-ack}
-\end{listing}
+\end{longlisting}
 
 W celu uproszczenia kodu sygnał \texttt{adr_burst} jest zawsze generowany w układzie, nawet jeśli obsługa transferów potokowych zostanie wyłączana --- w tym wypadku sygnał ten ma zawsze wartość \texttt{0b0}; sygnał ten może zostać automatycznie usunięty w trakcie optymalizacji układu przez programy do syntezy logiki.
 

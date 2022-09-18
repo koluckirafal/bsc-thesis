@@ -21,7 +21,7 @@ LiteX został wybrany jako podstawa tego projektu ze względu na dużą popularn
 
 LiteX zawiera modularne środowisko symulacji, które pozwala na symulację zaprojektowanego układu na podstawie opisanej w języku Migen logiki oraz parametrów dotyczących środowiska zewnętrznego. Możliwe jest dzięki temu przetestowanie układu oraz przeznaczonego na nie oprogramowania, przykładowo poprzez wykorzystanie wirtualnego interfejsu Ethernet do komunikacji. Ułatwia to usuwanie błędów z projektu układu, jak i oprogramowania, zanim jeszcze układ zostanie zsyntetyzowany do formy bitstreamu dla układu FPGA na potrzeby dalszych testów.
 
-\begin{listing}[H]
+\begin{longlisting}
 \begin{minted}{python}
 class SimSoC(TestSoC):
     def __init__(self, local_ip, remote_ip, **kwargs):
@@ -43,11 +43,11 @@ class SimSoC(TestSoC):
         platform.add_debug(self, reset=0)
 \end{minted}
 \caption{\label{lst:tooling-litex-sim-soc}Klasa SimSoC opisująca układ w formie przeznaczonej do symulacji}
-\end{listing}
+\end{longlisting}
 
 W celu uruchomienia naszego systemu w symulatorze układ musi zostać przetworzony do formy kodu programu komputerowego. W tym celu LiteX integruje obsługę programu Verilator\cite{verilator:2016:Online} w celu konwersji układu do kodu komputerowego w formie źródłowej. Ów program łączony jest z dodatkowymi modułami, które łączą naszą logikę z dodatkowymi modułami; pozwalają one na symulację wybranych peryferiów z użyciem zasobów systemu operacyjnego. W przypadku tego projektu będzie to interfejs szeregowy UART dostępny w formie standardowego strumienia wejścia/wyjścia oraz niewykorzystany interfejs Ethernet w formie wirtualnego interfejsu sieciowego w systemie hosta. W ten sposób symulacja układu nie różni się znacząco od wykonywania programu komputerowego, co ułatwia interakcję z programem wykonywanym w wirtualnym środowisku.
 
-\begin{listing}[H]
+\begin{longlisting}
 \begin{minted}{python}
 class SimSoC(TestSoC):
     # Funkcja opisująca elementy symulatora, które będą wykorzystywane
@@ -64,7 +64,7 @@ class SimSoC(TestSoC):
         return sim_config
 \end{minted}
 \caption{\label{lst:tooling-litex-sim-config}Funkcja opisująca sposób sterowania i komunikacji z testowanym układem z poziomu symulatora}
-\end{listing}
+\end{longlisting}
 
 W praktyce zbudowanie symulatora układu polega na podmianie wybranych peryferiów na modele, które są częściowo zaimplementowane w formie bibliotek dla symulatora Verilator, oraz na opisaniu wykorzystywanych modułów i sposobu dostępu do nich z poziomu systemu operacyjnego hosta.
 
@@ -74,7 +74,7 @@ Standardową praktyką przy testowaniu układów logicznych jest pisanie skrypt�
 
 Ze względu na wykorzystywanie języka Python w tej pracy do zaprojektowania układu SoC, dobrym pomysłem jest użycie go również w celu testowania logiki. W tym celu wykorzystana została biblioteka cocotb\cite{cocotb:2022:Online}, która pozwala na testowanie projektów zaimplementowanych w językach Verilog i VHDL z użyciem skryptów napisanych w języku Python. Cocotb współpracuje z zarówno komercyjnymi, jak i otwarto-źródłowymi symulatorami, dzięki czemu można tę bibliotekę wykorzystać w istniejących już środowiskach do projektowania układów logicznych.
 
-\begin{listing}[H]
+\begin{longlisting}
 \begin{minted}{python}
 @cocotb.test()
 async def test_blink(dut):
@@ -96,11 +96,11 @@ async def test_blink(dut):
     clk_gen.kill()
 \end{minted}
 \caption{\label{lst:tooling-sampletest}Fragment testu w języku Python realizującego operację odczytu wybranej ilości słów poprzez magistralę Wishbone}
-\end{listing}
+\end{longlisting}
 
 Jako że ręczne wykonywanie transmisji na magistrali Wishbone oraz interpretowanie ich wyników będzie często powtarzaną operacją, w zamian użyta została biblioteka cocotbext-wishbone\cite{cocotbext-wishbone:2022:Online}, która udostępnia dwa obiekty: monitora oraz sterownika. Sterownik odpowiada stronie inicjującej transfer na magistrali, natomiast monitor obsługuje transfery w ten sam sposób, co peryferium nasłuchujące na magistrali.
 
-\begin{listing}[H]
+\begin{longlisting}
 \begin{minted}{python}
 
 @cocotb.test()
@@ -114,7 +114,7 @@ async def test_blink(dut):
     wbRes = async self.wbs.send_cycle([WBOp(2), WBOp(3), WBOp(0), WBOp(1)])
 \end{minted}
 \caption{\label{lst:tooling-cocotbext-wishbone-example}Fragment testu w języku Python wykorzystującego bibliotekę cocotbext-wishbone w celu wykonania operacji odczytu na magistrali Wishbone}
-\end{listing}
+\end{longlisting}
 
 Wspomniana biblioteka cocotbext-wishbone została rozbudowana o przekazywanie i monitorowanie stanu dodatkowych sygnałów, które zostały uprzednio zdefiniowane w specyfikacji, a nie były wykorzystywane przy standardowych transferach. Pozwoliło to na kontrolowanie i monitorowanie stanu magistrali w testowanych układach po dokonaniu w nich zmian opisanych w następnym rozdziale.
 

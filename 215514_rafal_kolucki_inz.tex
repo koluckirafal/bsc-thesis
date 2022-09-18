@@ -1,4 +1,4 @@
-\documentclass[a4paper,12pt,final]{article}
+\documentclass[a4paper,12pt,twoside]{article}
 
 \usepackage{amsmath,amssymb}
 \usepackage{mathtools}
@@ -33,7 +33,7 @@
 \indexnumber{215514}
 \thesis{inżynierska}
 \supervisor[mgr Zbigniew Kulesza]{dr inż. Piotr Zając}
-\doubletitle{Optymalizacja dostępu procesora do~magistrali systemowej na~platformie RISC-V}{Optimalisation of~processor's access to~the~system bus on~the~RISC-V platform}
+\doubletitle{Optymalizacja dostępu procesora do~magistrali systemowej na~platformie RISC-V}{Optimalization of~processor's access to~the~system bus on~the~RISC-V platform}
 
 \begin{document}
 
@@ -48,10 +48,22 @@
 \maketitle
 
 \newpage
+\newpage
 
 \section*{Streszczenie}
-TODO: max 500 słów, po polski i po angielsku; ogólny zakres pracy, przedstawić główne uzyskane wyniki, zastosowane metody, nowatorstwo pracy i wyciągnięte wnioski.
+Rosnąca popularność niestandardowych projektów systemów jednoukładowych, bazujących głównie na programowalnych układach macierzy bramek (FPGA), doprowadziła do zwiększonego zainteresowania technikami optymalizacji wydajności systemów. Jednocześnie pula dostępnych optymalizacji jest ograniczona do samego sposobu działania systemów ze względu na takie parametry jak maksymalna częstotliwość taktowania układu. W ramach tej pracy zrealizowane zostało zaimplementowanie optymalizacji wybranych peryferiów, pozwalając na osiągnięcie większej wydajności transferu danych. Omówione zostały trzy kluczowe zagadnienia.
 
+Pierwszym z nich jest implementacja obsługi transferów potokowych na przykładzie dwóch peryferiów: modułu komunikacyjnego oraz prostej pamięci RAM. Drugim z nich jest analiza poprawności działania oraz wydajności wprowadzonych zmian z wykorzystaniem systemu testów jednostkowych oraz programu mierzącego wydajność testowego systemu jednoukładowego. Na koniec opracowane zostały wnioski oparte na wynikach przeprowadzonych testów.
+\newline\newline\newline
+\textbf{Słowa kluczowe:} systemy jednoukładowe, magistrala systemowa, testy jednostkowe, FPGA, RISC-V
+\newpage
+
+\section*{Abstract}
+The growing popularity of custom single-chip system designs, based mainly on field-programmable gate array chips (FPGA), has led to increased interest in system performance optimization techniques. At the same time, the pool of available optimizations is limited to the very way the systems operate due to parameters such as maximum chip clock frequency. This thesis focuses on implementation of the optimizations in selected peripherals, allowing faster data transfers to be achieved. Three key issues are discussed.
+
+The first is the implementation of pipelined transfer support using two peripherals as an example: a communication module and a simple RAM module. The second is the analysis of the correct operation and performance of the implemented changes using a unit tests system and a program measuring the performance of a single-chip test system. Finally, conclusions based on the results of the tests are described.
+\newline\newline\newline
+\textbf{Keywords:} single-chip systems, system bus, unit tests, FPGA, RISC-V
 \newpage
 
 %\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
@@ -72,13 +84,13 @@ TODO: max 500 słów, po polski i po angielsku; ogólny zakres pracy, przedstawi
 \bibliographystyle{plain}
 \addchapterline{Literatura}
 \bibliography{refs}
-
+\newpage
 \addchapterline{\listfigurename}
 \listoffigures
-
+\newpage
 \addchapterline{\listtablename}
 \listoftables
-
+\newpage
 \addchapterline{Spis listingów}
 \listof{listing}{Spis listingów}
 
