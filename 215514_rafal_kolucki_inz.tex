@@ -1,4 +1,4 @@
-\documentclass[a4paper,12pt,twoside]{article}
+\documentclass[a4paper,12pt,twoside,titlepage]{article}
 
 \usepackage{amsmath,amssymb}
 \usepackage{mathtools}
@@ -20,6 +20,15 @@
 \usepackage[format=plain,font=it]{caption}
 \usepackage{fancyhdr}
 
+\usepackage{afterpage}
+\newcommand\myemptypage{
+    \null
+    \thispagestyle{empty}
+    \addtocounter{page}{-1}
+    \newpage
+    }
+
+
 \linespread{1.3}
 \setminted{fontsize=\footnotesize,breaklines}
 \newenvironment{longlisting}{\captionsetup{type=listing}}{}
@@ -32,6 +41,7 @@
 \author{Kołucki Rafał}
 \indexnumber{215514}
 \thesis{inżynierska}
+\date{18 września 2022 r.}
 \supervisor[mgr Zbigniew Kulesza]{dr inż. Piotr Zając}
 \doubletitle{Optymalizacja dostępu procesora do~magistrali systemowej na~platformie RISC-V}{Optimalization of~processor's access to~the~system bus on~the~RISC-V platform}
 
@@ -47,8 +57,7 @@
 
 \maketitle
 
-\newpage
-\newpage
+\myemptypage
 
 \section*{Streszczenie}
 Rosnąca popularność niestandardowych projektów systemów jednoukładowych, bazujących głównie na programowalnych układach macierzy bramek (FPGA), doprowadziła do zwiększonego zainteresowania technikami optymalizacji wydajności systemów. Jednocześnie pula dostępnych optymalizacji jest ograniczona do samego sposobu działania systemów ze względu na takie parametry jak maksymalna częstotliwość taktowania układu. W ramach tej pracy zrealizowane zostało zaimplementowanie optymalizacji wybranych peryferiów, pozwalając na osiągnięcie większej wydajności transferu danych. Omówione zostały trzy kluczowe zagadnienia.
